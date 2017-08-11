@@ -3,3 +3,7 @@
 /files/
 /tools/modelbuilder.ini
 /update-composer.cmd
+/tests/lib/db/
+!/tests/lib/db/CustomerRepository.php
+/tests/lib/model/
+!/tests/lib/model/Customer.php

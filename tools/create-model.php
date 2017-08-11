@@ -10,4 +10,3 @@ $projectFileRoot =   str_replace('\\','/', realpath(__DIR__.'/..')).'/';
 \Tops\sys\TPath::Initialize($projectFileRoot,'tests/config');
 $config = parse_ini_file(__DIR__."/modelbuilder.ini",true);
 \Tops\db\TModelBuilder::Build($config);
-print "\ndone.";
