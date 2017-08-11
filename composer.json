@@ -1,0 +1,30 @@
+{
+  "name": "twoquakers/tops-db",
+  "version" : "3.0",
+  "description": "PHP Library for simple Database",
+  "minimum-stability": "stable",
+  "license": "GPL-3.0+",
+  "authors": [
+    {
+      "name": "Terry SoRelle",
+      "email": "tls@2quakers.net"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Tops\\db\\": "tops/lib/db",
+      "TwoQuakers\\testing\\" : "tests/lib",
+      "TestPackage\\" : "tests/pnut/packages/test-package/src"
+    }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/tsorelle/tops"
+    }
+  ],
+  "require": {
+    "phpunit/phpunit": "6.1.3",
+    "twoquakers/tops" : "dev-master"
+  }
+}
