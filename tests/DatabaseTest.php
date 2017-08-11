@@ -13,9 +13,9 @@ class DatabaseTest extends TestCase
     public function testGetDefaultConnectionParams() {
         $actual = \Tops\db\TDatabase::getConnectionParams();
         $expected = new stdClass();
-        $expected->user = 'mrpeanut';
-        $expected->pwd = 'Pe@nutButter';
-        $expected->dsn = 'mysql:host=localhost;dbname=twoquake_qnut';
+        $expected->user = 'twoquake_pnutman';
+        $expected->pwd = 'Wh@tC@nstTh0u$ay';
+        $expected->dsn = 'mysql:host=localhost;dbname=twoquake_test';
         $this->assertEquals($expected->user,$actual->user, 'User incorrect');
         $this->assertEquals($expected->pwd,$actual->pwd, 'Incorrect password');
         $this->assertEquals($expected->dsn,$actual->dsn, 'Incorrect dsn');
