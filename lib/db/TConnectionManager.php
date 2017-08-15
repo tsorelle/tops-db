@@ -11,19 +11,18 @@ namespace Tops\db;
 
 abstract class TConnectionManager
 {
-    public function makeDbParameters(
+    public function makeParameterObject(
         $database,
         $user,
         $pwd,
         $server = 'localhost')
     {
-        $result = array(
-            'database' => $database,
-            'user' => $user,
-            'pwd' => $pwd
-        );
+        $result = new \stdClass();
+        $result->database = $database;
+        $result->user = $user;
+        $result->pwd = $pwd;
         if ($server != 'localhost' && !empty($server)) {
-            $result['server'] = $server;
+            $result->server = $server;
         }
         return $result;
     }
