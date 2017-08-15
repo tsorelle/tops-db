@@ -7,3 +7,4 @@
 !/tests/lib/db/CustomerRepository.php
 /tests/lib/model/
 !/tests/lib/model/Customer.php
+/tests/files/tmp/

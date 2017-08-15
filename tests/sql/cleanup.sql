@@ -1,0 +1,10 @@
+drop table testing_customers       ;    
+drop table testing_customertypes   ;    
+drop table testing_examples        ;    
+drop table testing_invoicelineitems;    
+drop table testing_invoices        ;    
+drop table testing_orderstatuses   ;    
+drop table testing_supplier_titles ;    
+drop table testing_suppliers       ;    
+drop table testing_testtable       ;    
+drop table testing_titles          ;   

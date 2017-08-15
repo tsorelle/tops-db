@@ -9,7 +9,11 @@
 namespace Tops\db;
 
 use \PDO;
+use PHPUnit\Runner\Exception;
+use Tops\sys\TObjectContainer;
 use Tops\sys\TPath;
+use Tops\sys\TSession;
+use Tops\db\TConnectionManager;
 
 class TDatabase
 {
@@ -47,8 +51,29 @@ class TDatabase
                     self::$dbconfig[$key] = $params;
                 }
             }
+            if (TObjectContainer::HasDefinition('tops.connections')) {
+                /**
+                 * @var TConnectionManager
+                 */
+                $connectionManager = TObjectContainer::Get('tops.connections');
+                $config = $connectionManager->getNativeConfiguration();
+                if ($config) {
+                    if (!empty($config->default)) {
+                        self::$defaultDbName = $config->default;
+                    }
+                    self::$dbconfig=array_merge($ini,$config->connections);
+                }
+            }
         }
         return self::$dbconfig;
+    }
+
+    public static function getDbConfigurationForTest() {
+        self::$dbconfig = null;
+        $result = new \stdClass();
+        $result->connections = self::getDbConfiguration();
+        $result->default = self::$defaultDbName;
+        return $result;
     }
 
     public static function getConnectionParams($key = null)
@@ -69,6 +94,25 @@ class TDatabase
         $dbh = new PDO($settings->dsn,$settings->user,$settings->pwd);
         $dbh->setAttribute(PDO::ATTR_ERRMODE, self::$errorMode);
         return $dbh;
+    }
+
+    public static function ExecuteSql($token, $script, $connection=null) {
+        if ($token != TSession::GetSecurityToken()) {
+            throw new \Exception('Unauthorized database access');
+        }
+        if (empty($connection)) {
+            $connection = null;
+        }
+        if (gettype($connection) !== 'object') {
+            $connection = self::getConnection($connection);
+        }
+        $sql = file_get_contents($script);
+        if (empty($sql)) {
+            throw new Exception('SQL Script not found.');
+        }
+        $query = $connection->prepare($sql);
+        $result = $query->execute();
+        return $result;
     }
 
 
