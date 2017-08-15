@@ -25,30 +25,36 @@ class TDatabase
     {
         if (empty(self::$dbconfig)) {
             $configPath = TPath::getConfigPath() . 'database.ini';
-            $ini = parse_ini_file($configPath, true);
-            if ($ini === false) {
-                throw new \Exception("No database configuration file: '$configPath'");
+            if (!file_exists($configPath)) {
+                self::$dbconfig = array();
+                self::$defaultDbName = 'database';
             }
-            $keys = array_keys($ini);
-            foreach ($keys as $key) {
-                $settings = $ini[$key];
-                if ($key == 'settings') {
-                    self::$defaultDbName = empty($settings['default']) ? 'database' : $settings['default'];
-                    self::$errorMode = isset($settings['errormode']) ? $settings['errormode'] : PDO::ERRMODE_EXCEPTION;
-                } else {
-                    if (empty($settings['database']) ||
-                        empty($settings['user']) ||
-                        empty($settings['pwd'])
-                    ) {
-                        throw new \Exception("Incomplete database configuration in database.ini, section:$key");
+            else {
+                $ini = parse_ini_file($configPath, true);
+                if ($ini === false) {
+                    throw new \Exception("No database configuration file: '$configPath'");
+                }
+                $keys = array_keys($ini);
+                foreach ($keys as $key) {
+                    $settings = $ini[$key];
+                    if ($key == 'settings') {
+                        self::$defaultDbName = empty($settings['default']) ? 'database' : $settings['default'];
+                        self::$errorMode = isset($settings['errormode']) ? $settings['errormode'] : PDO::ERRMODE_EXCEPTION;
+                    } else {
+                        if (empty($settings['database']) ||
+                            empty($settings['user']) ||
+                            empty($settings['pwd'])
+                        ) {
+                            throw new \Exception("Incomplete database configuration in database.ini, section:$key");
+                        }
+                        $server = empty($settings['server']) ? 'localhost' : $settings['server'];
+                        $dbname = $settings['database'];
+                        $params = new \stdClass();
+                        $params->user = $settings['user'];
+                        $params->pwd = $settings["pwd"];
+                        $params->dsn = "mysql:host=$server;dbname=$dbname";
+                        self::$dbconfig[$key] = $params;
                     }
-                    $server = empty($settings['server']) ? 'localhost' : $settings['server'];
-                    $dbname = $settings['database'];
-                    $params = new \stdClass();
-                    $params->user = $settings['user'];
-                    $params->pwd = $settings["pwd"];
-                    $params->dsn = "mysql:host=$server;dbname=$dbname";
-                    self::$dbconfig[$key] = $params;
                 }
             }
             if (TObjectContainer::HasDefinition('tops.connections')) {
@@ -61,11 +67,16 @@ class TDatabase
                     if (!empty($config->default)) {
                         self::$defaultDbName = $config->default;
                     }
-                    self::$dbconfig=array_merge($ini,$config->connections);
+                    self::$dbconfig=array_merge(self::$dbconfig,$config->connections);
                 }
             }
         }
         return self::$dbconfig;
+    }
+
+    public static function ClearCache() {
+        self::$dbconfig = null;
+        self::$defaultDbName = null;
     }
 
     public static function getDbConfigurationForTest() {

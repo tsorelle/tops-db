@@ -10,7 +10,13 @@ use PHPUnit\Framework\TestCase;
 
 class DatabaseTest extends TestCase
 {
+    private function ClearCaches() {
+        \Tops\sys\TObjectContainer::ClearCache();
+        \Tops\db\TDatabase::ClearCache();
+    }
+    
     public function testGetDefaultConnectionParams() {
+        $this->ClearCaches();
         $actual = \Tops\db\TDatabase::getConnectionParams();
         $expected = new stdClass();
         $expected->user = 'twoquake_pnutman';
@@ -21,6 +27,7 @@ class DatabaseTest extends TestCase
         $this->assertEquals($expected->dsn,$actual->dsn, 'Incorrect dsn');
     }
     public function testGetConnectionParams() {
+        $this->ClearCaches();
         $actual = \Tops\db\TDatabase::getConnectionParams('test');
         $expected = new stdClass();
         $expected->user = 'testuser';
@@ -32,6 +39,7 @@ class DatabaseTest extends TestCase
     }
 
     public function testGetConnection() {
+        $this->ClearCaches();
         $dbh = \Tops\db\TDatabase::getConnection();
         $this->assertNotNull($dbh);
         $q = $dbh->prepare("SHOW TABLES");
@@ -41,9 +49,9 @@ class DatabaseTest extends TestCase
     }
 
     public function testGetNativeConnection() {
-        \Tops\sys\TObjectContainer::ClearCache();
+        $this->ClearCaches();
         $testfile = __DIR__.'/files/classes.ini';
-        $tmpfile = __DIR__.'/files/tmp/classes.ini';
+        $tmpClassesFile = __DIR__.'/files/tmp/classes.ini';
         $classesini = __DIR__.'/config/classes.ini';
         $dbini = __DIR__.'/config/database.ini';
         if (file_exists($dbini)) {
@@ -56,7 +64,7 @@ class DatabaseTest extends TestCase
 
         $restore = (file_exists($classesini));
         if ($restore) {
-            copy ($classesini,$tmpfile);
+            copy ($classesini,$tmpClassesFile);
         }
         copy($testfile,$classesini);
         try {
@@ -66,12 +74,12 @@ class DatabaseTest extends TestCase
             $this->assertEquals('dbname',  $actual->connections['fakedb']['database']);
             $this->assertEquals('username',$actual->connections['fakedb']['user']);
             $this->assertEquals('password',$actual->connections['fakedb']['pwd']);
-            $actualConnections = sizeof($actual->connections) - 1;
+            $actualConnections = sizeof($actual->connections);
             self::assertEquals($actualConnections,$expectedConnections);
         }
         finally {
             if ($restore) {
-                copy($tmpfile, $classesini);
+                copy($tmpClassesFile, $classesini);
             }
             else {
                 unlink($classesini);
@@ -80,8 +88,8 @@ class DatabaseTest extends TestCase
     }
 
     public function testGetNativeConnectionNoConnectionClass() {
-        \Tops\sys\TObjectContainer::ClearCache();
-        $tmpfile = __DIR__.'/files/tmp/classes.ini';
+        $this->clearCaches();
+        $tmpClassesFile = __DIR__.'/files/tmp/classes.ini';
         $classesini = __DIR__.'/config/classes.ini';
         $dbini = __DIR__.'/config/database.ini';
         if (file_exists($dbini)) {
@@ -94,7 +102,7 @@ class DatabaseTest extends TestCase
 
         $restore = (file_exists($classesini));
         if ($restore) {
-            copy ($classesini,$tmpfile);
+            copy ($classesini,$tmpClassesFile);
             unlink($classesini);
         }
 
@@ -107,11 +115,46 @@ class DatabaseTest extends TestCase
         }
         finally {
             if ($restore) {
-                copy($tmpfile, $classesini);
+                copy($tmpClassesFile, $classesini);
             }
         }
     }
 
+    public function testGetConfigurationNoDbIni()
+    {
+        $this->clearCaches();
+        $testfile = __DIR__ . '/files/classes.ini';
+        $tmpClassesFile = __DIR__ . '/files/tmp/classes.ini';
+        $tmpDbFile = __DIR__ . '/files/tmp/database.ini';
+        $classesini = __DIR__ . '/config/classes.ini';
+        $dbini = __DIR__ . '/config/database.ini';
+        $expectedConnections = 1;
+        $restoreClassesFile = false;
+        copy($dbini, $tmpDbFile);
+        unlink($dbini);
+        try {
+            if (file_exists($classesini)) {
+                copy($classesini, $tmpClassesFile);
+                $restoreClassesFile = true;
+            }
+            copy($testfile, $classesini);
+            $actual = \Tops\db\TDatabase::getDbConfigurationForTest();
+            self::assertNotEmpty($actual);
+            $this->assertEquals('fakedb', $actual->default);
+            $this->assertEquals('dbname', $actual->connections['fakedb']['database']);
+            $this->assertEquals('username', $actual->connections['fakedb']['user']);
+            $this->assertEquals('password', $actual->connections['fakedb']['pwd']);
+            $actualConnections = sizeof($actual->connections);
+            self::assertEquals($actualConnections, $expectedConnections);
+        } finally {
+            if ($restoreClassesFile) {
+                copy($tmpClassesFile, $classesini);
+            } else {
+                unlink($classesini);
+            }
+            copy($tmpDbFile,$dbini);
+        }
+    }
     /*
     public function testGetCustomers() {
         $actusl = \TwoQuakers\testing\db\CustomerRepository::GetAll();
