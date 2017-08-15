@@ -21,13 +21,14 @@ class TDatabase
     private static $defaultDbName;
     private static $errorMode;
 
+
     private static function getDbConfiguration()
     {
         if (empty(self::$dbconfig)) {
+            self::$defaultDbName = 'database';
             $configPath = TPath::getConfigPath() . 'database.ini';
             if (!file_exists($configPath)) {
                 self::$dbconfig = array();
-                self::$defaultDbName = 'database';
             }
             else {
                 $ini = parse_ini_file($configPath, true);
@@ -64,7 +65,7 @@ class TDatabase
                 $connectionManager = TObjectContainer::Get('tops.connections');
                 $config = $connectionManager->getNativeConfiguration();
                 if ($config) {
-                    if (!empty($config->default)) {
+                    if (self::$defaultDbName == 'database' && !empty($config->default)) {
                         self::$defaultDbName = $config->default;
                     }
                     self::$dbconfig=array_merge(self::$dbconfig,$config->connections);
