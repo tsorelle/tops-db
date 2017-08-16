@@ -155,10 +155,4 @@ class DatabaseTest extends TestCase
             copy($tmpDbFile,$dbini);
         }
     }
-    /*
-    public function testGetCustomers() {
-        $actusl = \TwoQuakers\testing\db\CustomerRepository::GetAll();
-        $this->assertNotEmpty($actusl);
-    }
-    */
 }

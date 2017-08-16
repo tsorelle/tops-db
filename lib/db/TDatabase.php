@@ -24,6 +24,7 @@ class TDatabase
 
     private static function getDbConfiguration()
     {
+
         if (empty(self::$dbconfig)) {
             self::$defaultDbName = 'database';
             $configPath = TPath::getConfigPath() . 'database.ini';
@@ -100,11 +101,21 @@ class TDatabase
         return $connections[$key];
     }
 
-    public static function getConnection($key = null)
+    public static function getPersistentConnection($key = null) {
+        $connection = self::getConnection($key,array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            pdo::ATTR_PERSISTENT => true));
+        return $connection;
+    }
+
+    public static function getConnection($key = null,array $options=array())
     {
         $settings = self::getConnectionParams($key);
-        $dbh = new PDO($settings->dsn,$settings->user,$settings->pwd);
-        $dbh->setAttribute(PDO::ATTR_ERRMODE, self::$errorMode);
+        if (!array_key_exists(PDO::ATTR_ERRMODE,$options)) {
+            $options[PDO::ATTR_ERRMODE] = self::$errorMode;
+        }
+        $dbh = new PDO($settings->dsn,$settings->user,$settings->pwd,$options);
+        // $dbh->setAttribute(PDO::ATTR_ERRMODE, self::$errorMode);
         return $dbh;
     }
 

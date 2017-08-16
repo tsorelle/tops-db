@@ -1,7 +1,7 @@
 <?php 
 /** 
  * Created by /tools/create-model.php 
- * Time:  2017-07-03 21:42:06
+ * Time:  2017-08-16 22:47:10
  */ 
 
 namespace TwoQuakers\testing\model;

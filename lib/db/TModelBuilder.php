@@ -28,12 +28,12 @@ class TModelBuilder
     private static $prefix;
     private static $overwrite;
 
-    private static function buildSource($tableName,$className=null)
+    private static function buildSource($tableName,$className=null,$databaseId=null)
     {
         $dbh = self::$dbh;
         $dbPath = self::$dbPath;
         $modelsPath = self::$modelsPath;
-
+        $databaseId = empty($databaseId) ? 'null' : "'$databaseId'";
         $date = new \DateTime();
 
         print "\nBuilding $tableName...";
@@ -58,52 +58,38 @@ class TModelBuilder
             }
         }
 
-        $updateBindings = "";
-        $insertBindings = "";
-        $updateFields = array();
-        $insertNames = array();
-        $insertValues = array();
         $entityProperties = array();
+        $fieldDefs = array();
 
 
         $isTimestamped = false;
         foreach ($fields as $field) {
+            $fieldName = $field->Field;
             switch ($field->Field) {
                 case 'createdby' :
                     $isTimestamped = true;
-                    $insertBindings .= "\n\$stmt->bindValue(':createdby', \$userName ,PDO::PARAM_STR	);";
+                    $fieldDefs[] = "'$fieldName'=>PDO::PARAM_STR";
                     break;
                 case 'createdon' :
                     $isTimestamped = true;
-                    $insertBindings .= "\n\$stmt->bindValue(':createdon', \$date	  ,PDO::PARAM_STR	);";
+                    $fieldDefs[] = "'$fieldName'=>PDO::PARAM_STR";
                     break;
                 case 'changedby' :
                     $isTimestamped = true;
-                    $updateBindings .= "\n\$stmt->bindValue(':changedby', \$userName ,PDO::PARAM_STR	);";
-                    $updateFields[] = "\"changedby  = :changedby";
+                    $fieldDefs[] = "'$fieldName'=>PDO::PARAM_STR";
                     break;
                 case 'changedon' :
                     $isTimestamped = true;
-                    $updateBindings .= "\n\$stmt->bindValue(':changedon', \$date	  ,PDO::PARAM_STR	);";
-                    $updateFields[] = "\"changedon  = :changedon";
+                    $fieldDefs[] = "'$fieldName'=>PDO::PARAM_STR";
                     break;
                 default:
                     $entityProperties[] =  '    public $' . $field->Field . ";";
                     $type = explode('(', $field->Type)[0];
                     $type = $type == 'int' ? 'INT' : 'STR';
-                    $updateBindings .= "\n\$stmt->bindValue(':$field->Field', \$dto->$field->Field, PDO::PARAM_$type);";
-                    $updateFields[] =  "\"$field->Field = :$field->Field";
+                    $fieldDefs[] = "'$fieldName'=>PDO::PARAM_$type";
                     break;
             }
-
-            $insertNames[] = ' '.$field->Field;
-            $insertValues[] = " :$field->Field";
-
         }
-
-        $updateFields = join(", \\n\".\n",$updateFields)."\".\n";
-        $insertNames = join(",",$insertNames);
-        $insertValues = join(",",$insertValues);
 
         $superclass = $isTimestamped ? ' extends \Tops\db\TimeStampedEntity' : '' ;
         $entity =
@@ -121,89 +107,48 @@ class TModelBuilder
 
         $fullClassName = self::$appNamespace."\\model\\" . $className;
 
-        $repos =
-            "<?php \n".
-            "/** \n" .
-            " * Created by /tools/create-model.php \n" .
-            " * Time:  " . $date->format('Y-m-d H:i:s') . "\n" .
-            " */ \n\n" .
-            "namespace ".self::$appNamespace."\\db;" . "\n\n" .
-            'use \PDO; ' . "\n" .
-            "class $className" . "Repository \n" .
-            "{\n" .
-            "    public static function Get(\$id) { \n" .
-            "        \$dbh = Database::getConnection();\n" .
-            "        \$sql = \"SELECT * FROM $tableName WHERE id = ?\";\n" .
-            "        /** \n" .
-            "         * @var PDOStatement \n" .
-            "         */ \n" .
-            "        \$stmt = \$dbh->prepare(\$sql); \n" .
-            "        \$stmt->execute(array(\$id)); \n" .
-            "        \$stmt->setFetchMode(PDO::FETCH_CLASS, '$fullClassName'); \n" .
-            "        \$result = \$stmt->fetch(); \n" .
-            "        return \$result; \n" .
-            "    } \n" .
-            " \n" .
-            "    public static function Update(\$dto, \$userName = 'admin') { \n" .
-            "        \$dbh = Database::getConnection(); \n" .
-            "        \$sql = \n" .
-            "            \"UPDATE $tableName SET \".\n" .
-            "            $updateFields \n" .
-            "        \"WHERE id = :id\"; \n" .
-            "        \$today = new \\DateTime();  \n" .
-            "        \$date = \$today->format('Y-m-d H:i:s');  \n\n" .
-            "        /** \n" .
-            "         * @var PDOStatement \n" .
-            "         */ \n" .
-            "        \$stmt = \$dbh->prepare(\$sql);  \n" .
-            "        $updateBindings \n" .
-            "        \$count = \$stmt->execute(); \n" .
-            "        \$result = \$dbh->lastInsertId(); \n" .
-            "        return \$result;  \n" .
-            "    } \n" .
-            " \n" .
-            "    public static function Create(\$dto,\$userName = 'admin') { \n" .
-            "        \$dbh = Database::getConnection(); \n" .
-            "        \$sql = \"INSERT INTO $tableName ( $insertNames) \". \n" .
-            "                \"VALUES ($insertValues)\"; \n\n" .
-            "        \$today = new \\DateTime(); \n" .
-            "        \$date = \$today->format('Y-m-d H:i:s'); \n\n" .
-            "        /** \n" .
-            "         * @var PDOStatement \n" .
-            "         */ \n" .
-            "        \$stmt = \$dbh->prepare(\$sql); \n" .
-            "        $updateBindings  \n\n" .
-            "        $insertBindings  \n\n" .
-            "        \$count = \$stmt->execute(); \n" .
-            "        \$result = \$dbh->lastInsertId(); \n" .
-            "        return \$result; \n" .
-            "    } \n\n" .
-            "    public static function Delete(\$id) { \n" .
-            "        \$dbh = Database::getConnection(); \n" .
-            "        \$sql = \"DELETE FROM $tableName WHERE id = ?\"; \n" .
-            "        /** \n" .
-            "         * @var PDOStatement \n" .
-            "         */ \n" .
-            "        \$stmt = \$dbh->prepare(\$sql); \n" .
-            "        \$stmt->execute(array(\$id)); \n" .
-            "    } \n\n" .
-            "    public static function GetAll(\$where = '' ) { \n" .
-            "        \$dbh = \\Tops\\db\\TDatabase::getConnection(); \n" .
-            "        \$sql = \"SELECT * FROM $tableName\"; \n" .
-            "        if (\$where) { \n" .
-            "            \$sql .= \" WHERE \$where\"; \n" .
-            "        } \n\n" .
-            "        /** \n" .
-            "         * @var PDOStatement \n" .
-            "         */ \n" .
-            "        \$stmt = \$dbh->prepare(\$sql); \n" .
-            "        \$stmt->execute(); \n\n" .
-            "        \$result = \$stmt->fetchAll(PDO::FETCH_CLASS,'$fullClassName'); \n" .
-            "        return \$result; \n" .
-            "    } \n" .
-            "} \n";
+        $code = array(
+            "<?php ",
+            "/** ",
+            " * Created by /tools/create-model.php ",
+            " * Time:  " . $date->format('Y-m-d H:i:s'),
+            " */ " .
+            "namespace ".self::$appNamespace."\\db;",
+            '',
+            'use \PDO;',
+            'use PDOStatement;',
+            'use Tops\db\TDatabase;',
+            'use Tops\db\TEntityRepository;',
+            '',
+            "class $className" . "Repository extends TEntityRepository ",
+            "{",
+            "    protected function getClassName() {",
+            "        return '$fullClassName';",
+            "    }",
+            "",
+            "    protected function getTableName() {",
+            "        return '$tableName';",
+            "    }",
+            "",
+            "    protected function getDatabaseId() {",
+            "        return $databaseId;",
+            "    }",
+            "",
+            "    protected function getFieldDefinitionList()",
+            "    {",
+            "        return array("
+            );
 
+            $last = sizeof($fieldDefs);
+            $count = 0;
+            foreach ($fieldDefs as $def) {
+                $count++;
+                $code[] = "        $def".($count == $last? ');' : ',');
+            }
+            $code[] = '    }';
+            $code[] = '}';
 
+        $repos = join("\n",$code);
 
         self::writeFile($modelsPath,$className.'.php',$entity);
         self::writeFile($dbPath,$className.'Repository.php',$repos);
@@ -277,7 +222,7 @@ class TModelBuilder
 
         foreach ($tables as $table) {
             if (array_key_exists($table,$include)) {
-                 self::buildSource($table,$include[$table]);
+                 self::buildSource($table,$include[$table],$databaseKey);
             }
         }
 
