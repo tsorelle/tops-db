@@ -98,22 +98,24 @@ class TModelBuilder
             " * Created by /tools/create-model.php \n" .
             " * Time:  " . $date->format('Y-m-d H:i:s') . "\n" .
             " */ \n\n" .
-            "namespace ".self::$appNamespace."\\model;" . "\n\n" .
+            // "namespace ".self::$appNamespace."\\model;" . "\n\n" .
+            "namespace ".self::$appNamespace."\\entity;" . "\n\n" .
             "class $className $superclass \n" .
             "{ \n".
             join("\n",$entityProperties).
             "\n} \n";
 
 
-        $fullClassName = self::$appNamespace."\\model\\" . $className;
+        // $fullClassName = self::$appNamespace."\\model\\" . $className;
+        $fullClassName = self::$appNamespace."\\entity\\" . $className;
 
         $code = array(
             "<?php ",
             "/** ",
             " * Created by /tools/create-model.php ",
             " * Time:  " . $date->format('Y-m-d H:i:s'),
-            " */ " .
-            "namespace ".self::$appNamespace."\\db;",
+            " */ \n" .
+            "namespace ".self::$appNamespace."\\repository;\n",
             '',
             'use \PDO;',
             'use PDOStatement;',
@@ -200,14 +202,16 @@ class TModelBuilder
             throw new \Exception("Application directory '$srcRoot' does not exist");
         }
 
-        self::$appNamespace = $appNamespace == null ? $appNamespace : TConfiguration::getValue('applicationNamespace','services');
+        self::$appNamespace = $appNamespace == null ?
+            TConfiguration::getValue('applicationNamespace','services') :
+            $appNamespace;
 
 
-        self::$modelsPath = $srcRoot.'model/';
-        self::$dbPath = $srcRoot.'db/';
+        self::$modelsPath = $srcRoot.'entity/';
+        self::$dbPath = $srcRoot.'repository/';
         self::makeDirectory(self::$modelsPath);
         self::makeDirectory(self::$dbPath);
-        self::$dbPath = $srcRoot.'db/';
+        // self::$dbPath = $srcRoot.'db/';
         self::$dbh = TDatabase::getConnection($databaseKey);
         if (substr(self::$appNamespace,0,1) == '\\') {
             self::$appNamespace = substr(self::$appNamespace,1);

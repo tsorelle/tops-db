@@ -27,7 +27,7 @@ class RepositoryTest extends TestCase
 
     public function testGetAllEntities() {
         $this->runSqlScriipt('new-customer-table');
-        $repository = new \TwoQuakers\testing\db\CustomerRepository();
+        $repository = new \Bookstore\model\repository\CustomerRepository();
         $actusl = $repository->getAll();
         $this->assertNotEmpty($actusl);
         $actualCount = sizeof($actusl);
@@ -37,9 +37,9 @@ class RepositoryTest extends TestCase
 
     public function testTransaction() {
         $this->runSqlScriipt('new-customer-table');
-        $repository = new \TwoQuakers\testing\db\CustomerRepository();
+        $repository = new \Bookstore\model\repository\CustomerRepository();
 
-        $customer = new \TwoQuakers\testing\model\Customer();
+        $customer = new \Bookstore\model\entity\Customer();
         $customer->id = 0;
         $customer->customertypeid = 1;
         $customer->name = 'New Test Customer';
@@ -66,7 +66,7 @@ class RepositoryTest extends TestCase
 
     public function testInsertEntity() {
         $this->runSqlScriipt('new-customer-table');
-        $customer = new \TwoQuakers\testing\model\Customer();
+        $customer = new \Bookstore\model\entity\Customer();
         $customer->id = 0;
         $customer->customertypeid = 1;
         $customer->name = 'New Test Customer';
@@ -77,7 +77,7 @@ class RepositoryTest extends TestCase
         $customer->buyer = 'Joe Buyer';
         $customer->active = 1;
 
-        $repository = new \TwoQuakers\testing\db\CustomerRepository();
+        $repository = new \Bookstore\model\repository\CustomerRepository();
         $returnedId = $repository->insert($customer);
         $this->assertTrue($returnedId > 0);
         $actusl = $repository->getAll();
@@ -89,7 +89,7 @@ class RepositoryTest extends TestCase
     public function testGetEntity() {
         $this->runSqlScriipt('new-customer-table');
 
-        $repository = new \TwoQuakers\testing\db\CustomerRepository();
+        $repository = new \Bookstore\model\repository\CustomerRepository();
         $expectedId = 2;
         $expectedCustomertypeid = 1;
         $expectedName = 'Kinder Kindles';
@@ -126,7 +126,7 @@ class RepositoryTest extends TestCase
         $expectedBuyer = 'bob';
         $expectedActive = 1;
 
-        $repository = new \TwoQuakers\testing\db\CustomerRepository();
+        $repository = new \Bookstore\model\repository\CustomerRepository();
         $customer = $repository->get(1);
         $customer->city = $expectedCity;
         $customer->state = $expectedState;
@@ -160,7 +160,7 @@ class RepositoryTest extends TestCase
         $expectedBuyer = 'bob';
         $expectedActive = 1;
 
-        $repository = new \TwoQuakers\testing\db\CustomerRepository();
+        $repository = new \Bookstore\model\repository\CustomerRepository();
         $updateValues = array(
             'city' => $expectedCity,
             'state' => $expectedState,
@@ -184,7 +184,7 @@ class RepositoryTest extends TestCase
     }
     public function testRemove() {
         $this->runSqlScriipt('new-customer-table');
-        $repository = new \TwoQuakers\testing\db\CustomerRepository();
+        $repository = new \Bookstore\model\repository\CustomerRepository();
         $errorcode = $repository->remove(1);
         $this->assertEquals(0,$errorcode);
         $remaining = $repository->getAll();
@@ -195,7 +195,7 @@ class RepositoryTest extends TestCase
 
     public function testDelete() {
         $this->runSqlScriipt('new-customer-table');
-        $repository = new \TwoQuakers\testing\db\CustomerRepository();
+        $repository = new \Bookstore\model\repository\CustomerRepository();
         $errorcode = $repository->delete(1); // delete rather than deactivate
         $this->assertEquals(0,$errorcode);
         $remaining = $repository->getAll();
