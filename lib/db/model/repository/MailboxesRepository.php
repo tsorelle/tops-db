@@ -14,7 +14,7 @@ use Tops\db\TEntityRepository;
 class MailboxesRepository extends TEntityRepository 
 {
     protected function getClassName() {
-        return 'Tops\db\model\entity\Mailboxes';
+        return 'Tops\mail\TMailbox';
     }
 
     protected function getTableName() {

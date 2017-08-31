@@ -19,5 +19,11 @@ class MailboxRepositoryTest extends TestCase
         $actual = $manager->findByCode($expected);
         $this->assertNotNull($actual);
         $this->assertEquals($expected,$actual->getMailboxCode());
+        $actualCode = $actual->getMailboxCode();
+        $displayText = $actual->getName();
+        $address = $actual->getEmail();
+        $id = $actual->getMailboxId();
+        $description = $actual->getDescription();
+        $this->assertEquals($expected,$actualCode);
     }
 }
