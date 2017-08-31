@@ -13,7 +13,6 @@ use PHPUnit\Runner\Exception;
 use Tops\sys\TObjectContainer;
 use Tops\sys\TPath;
 use Tops\sys\TSession;
-use Tops\db\TConnectionManager;
 
 class TDatabase
 {

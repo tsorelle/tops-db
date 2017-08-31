@@ -10,9 +10,8 @@ namespace Tops\db;
 
 use \PDO;
 use PDOStatement;
-use Tops\db\TDatabase;
 
-abstract class TEntityRepository
+abstract class TEntityRepository implements IEntityRepository
 {
 
     private $fieldDefinitions;
@@ -62,7 +61,7 @@ abstract class TEntityRepository
 
     /**
      * @param $id
-     * @return \TwoQuakers\testing\model\Customer
+     * @return mixed
      */
     public function get($id) {
         $dbh = $this->getConnection();
@@ -223,5 +222,13 @@ abstract class TEntityRepository
 
         $result = $stmt->fetchAll(PDO::FETCH_CLASS,$this->getClassName());
         return $result;
+    }
+
+    public function getFirst($where = '', $includeInactive = false) {
+        $result = $this->getAll($where,$includeInactive);
+        if (empty($result)) {
+            return false;
+        }
+        return $result[0];
     }
 }
