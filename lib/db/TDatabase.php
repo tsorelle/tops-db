@@ -19,7 +19,7 @@ class TDatabase
     private static $dbconfig = array();
     private static $defaultDbName;
     private static $aliases = array();
-    private static $errorMode;
+    private static $errorMode = PDO::ERRMODE_EXCEPTION;
 
 
     private static function getDbConfiguration()
