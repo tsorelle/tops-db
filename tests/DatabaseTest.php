@@ -57,6 +57,9 @@ class DatabaseTest extends TestCase
         if (file_exists($dbini)) {
             $ini = parse_ini_file($dbini,true);
             $expectedConnections = sizeof(array_keys($ini));
+            if (array_key_exists('alias',$ini)) {
+                $expectedConnections--;
+            }
         }
         else {
             $expectedConnections = 1;
@@ -71,9 +74,9 @@ class DatabaseTest extends TestCase
             $actual = \Tops\db\TDatabase::getDbConfigurationForTest();
             self::assertNotEmpty($actual);
             // $this->assertEquals('fakedb',$actual->default);
-            $this->assertEquals('dbname',  $actual->connections['fakedb']['database']);
-            $this->assertEquals('username',$actual->connections['fakedb']['user']);
-            $this->assertEquals('password',$actual->connections['fakedb']['pwd']);
+            $this->assertEquals('dbname',  $actual->connections['fakedb']->dsn);
+            $this->assertEquals('username',$actual->connections['fakedb']->user);
+            $this->assertEquals('password',$actual->connections['fakedb']->pwd);
             $actualConnections = sizeof($actual->connections);
             self::assertEquals($actualConnections,$expectedConnections);
         }
@@ -95,6 +98,9 @@ class DatabaseTest extends TestCase
         if (file_exists($dbini)) {
             $ini = parse_ini_file($dbini,true);
             $expectedConnections = sizeof(array_keys($ini)) - 1;
+            if (array_key_exists('alias',$ini)) {
+                $expectedConnections--;
+            }
         }
         else {
             $expectedConnections = 0;
@@ -141,9 +147,9 @@ class DatabaseTest extends TestCase
             $actual = \Tops\db\TDatabase::getDbConfigurationForTest();
             self::assertNotEmpty($actual);
             $this->assertEquals('fakedb', $actual->default);
-            $this->assertEquals('dbname', $actual->connections['fakedb']['database']);
-            $this->assertEquals('username', $actual->connections['fakedb']['user']);
-            $this->assertEquals('password', $actual->connections['fakedb']['pwd']);
+            $this->assertEquals('dbname', $actual->connections['fakedb']->dsn);
+            $this->assertEquals('username', $actual->connections['fakedb']->user);
+            $this->assertEquals('password', $actual->connections['fakedb']->pwd);
             $actualConnections = sizeof($actual->connections);
             self::assertEquals($actualConnections, $expectedConnections);
         } finally {
@@ -154,5 +160,15 @@ class DatabaseTest extends TestCase
             }
             copy($tmpDbFile,$dbini);
         }
+    }
+
+    public function testAlias() {
+        $this->ClearCaches();
+        $dbh = \Tops\db\TDatabase::getConnection('package-db');
+        $q = $dbh->prepare("SHOW TABLES");
+        $q->execute();
+        $tables = $q->fetchAll(PDO::FETCH_COLUMN);
+        $this->assertNotEmpty($tables);
+        $this->assertNotNull($dbh);
     }
 }

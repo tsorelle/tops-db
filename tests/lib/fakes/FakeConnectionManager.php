@@ -27,13 +27,15 @@ class FakeConnectionManager extends TConnectionManager
         }
         $result = new \stdClass();
         $result->default = 'fakedb';
+
+        $fakeConnection = new \stdClass();
+        $fakeConnection->dsn = 'dbname';
+        $fakeConnection->user = 'username';
+        $fakeConnection->pwd=  'password';
+
         $result->connections =
             array(
-                'fakedb' => array(
-                    'database' => 'dbname',
-                    'user' => 'username',
-                    'pwd' => 'password',
-                )
+                'fakedb' => $fakeConnection
             );
 
         return $result;

@@ -18,6 +18,7 @@ class TDatabase
 {
     private static $dbconfig = array();
     private static $defaultDbName;
+    private static $aliases = array();
     private static $errorMode;
 
 
@@ -41,6 +42,9 @@ class TDatabase
                     if ($key == 'settings') {
                         self::$defaultDbName = empty($settings['default']) ? 'database' : $settings['default'];
                         self::$errorMode = isset($settings['errormode']) ? $settings['errormode'] : PDO::ERRMODE_EXCEPTION;
+                    }
+                    else if ($key == 'alias') {
+                        self::$aliases = $settings;
                     } else {
                         if (empty($settings['database']) ||
                             empty($settings['user']) ||
@@ -91,13 +95,16 @@ class TDatabase
     public static function getConnectionParams($key = null)
     {
         $connections = self::getDbConfiguration();
-        if ($key == null) {
-            $key = self::$defaultDbName;
+        $connectionKey = self::$defaultDbName;
+        if ($key != null) {
+            if (array_key_exists($key,$connections)) {
+                $connectionKey = $key;
+            }
+            else  if (array_key_exists( $key, self::$aliases)) {
+                $connectionKey = self::$aliases[$key];
+            }
         }
-        if (!array_key_exists( $key, $connections)) {
-            throw new \Exception("Connection parameters for database '$key' not found.");
-        }
-        return $connections[$key];
+        return $connections[$connectionKey];
     }
 
     public static function getPersistentConnection($key = null) {
