@@ -6,7 +6,9 @@
 
 namespace Bookstore\model\entity;
 
-class Customer  extends \Tops\db\TimeStampedEntity 
+use Tops\db\TimeStampedEntity;
+
+class Customer  extends TimeStampedEntity
 { 
     public $id;
     public $customertypeid;
