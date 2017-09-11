@@ -35,4 +35,9 @@ class MailboxesRepository extends TEntityRepository
         'description'=>PDO::PARAM_STR,
         'active'=>PDO::PARAM_STR);
     }
+
+    protected function getLookupField()
+    {
+        return 'mailboxcode';
+    }
 }

@@ -7,26 +7,16 @@
  */
 
 use PHPUnit\Framework\TestCase;
+use Tops\db\EntityRepositoryFactory;
 use Tops\sys\TPath;
+use TwoQuakers\testing\RepositoryTestFixture;
 
-class RepositoryTest extends TestCase
+class RepositoryTest extends RepositoryTestFixture
 {
-    private function ClearCaches() {
-        \Tops\sys\TObjectContainer::ClearCache();
-        \Tops\db\TDatabase::ClearCache();
-    }
 
-    private function runSqlScriipt($script) {
-        $this->ClearCaches();
-        $token=\Tops\sys\TSession::GetSecurityToken();
-        $script = TPath::GetFileRoot()."tests/sql/$script.sql";
-        $this->assertTrue(file_exists($script),"Cannot complete test. Sql script '$script' not found.'");
-        $result = \Tops\db\TDatabase::ExecuteSql($token,$script);
-        return $result;
-    }
 
     public function testGetAllEntities() {
-        $this->runSqlScriipt('new-customer-table');
+        $this->runSqlScript('new-customer-table');
         $repository = new \Bookstore\model\repository\CustomerRepository();
         $actusl = $repository->getAll();
         $this->assertNotEmpty($actusl);
@@ -36,7 +26,7 @@ class RepositoryTest extends TestCase
     }
 
     public function testTransaction() {
-        $this->runSqlScriipt('new-customer-table');
+        $this->runSqlScript('new-customer-table');
         $repository = new \Bookstore\model\repository\CustomerRepository();
 
         $customer = new \Bookstore\model\entity\Customer();
@@ -65,7 +55,7 @@ class RepositoryTest extends TestCase
     }
 
     public function testInsertEntity() {
-        $this->runSqlScriipt('new-customer-table');
+        $this->runSqlScript('new-customer-table');
         $customer = new \Bookstore\model\entity\Customer();
         $customer->id = 0;
         $customer->customertypeid = 1;
@@ -87,7 +77,7 @@ class RepositoryTest extends TestCase
     }
 
     public function testGetEntity() {
-        $this->runSqlScriipt('new-customer-table');
+        $this->runSqlScript('new-customer-table');
 
         $repository = new \Bookstore\model\repository\CustomerRepository();
         $expectedId = 2;
@@ -115,7 +105,7 @@ class RepositoryTest extends TestCase
     }
 
     public function testUpdateEntity() {
-        $this->runSqlScriipt('new-customer-table');
+        $this->runSqlScript('new-customer-table');
         $expectedId = 1;
         $expectedCustomertypeid = 2;
         $expectedName = 'Kids Korner Bookstore';
@@ -149,7 +139,7 @@ class RepositoryTest extends TestCase
         $this->assertEquals($expectedActive, $customer->active);
     }
     public function testUpdateEntityFields() {
-        $this->runSqlScriipt('new-customer-table');
+        $this->runSqlScript('new-customer-table');
         $expectedId = 1;
         $expectedCustomertypeid = 2;
         $expectedName = 'Kids Korner Bookstore';
@@ -183,7 +173,7 @@ class RepositoryTest extends TestCase
 
     }
     public function testRemove() {
-        $this->runSqlScriipt('new-customer-table');
+        $this->runSqlScript('new-customer-table');
         $repository = new \Bookstore\model\repository\CustomerRepository();
         $errorcode = $repository->remove(1);
         $this->assertEquals(0,$errorcode);
@@ -194,7 +184,7 @@ class RepositoryTest extends TestCase
     }
 
     public function testDelete() {
-        $this->runSqlScriipt('new-customer-table');
+        $this->runSqlScript('new-customer-table');
         $repository = new \Bookstore\model\repository\CustomerRepository();
         $errorcode = $repository->delete(1); // delete rather than deactivate
         $this->assertEquals(0,$errorcode);
@@ -204,4 +194,6 @@ class RepositoryTest extends TestCase
         $this->assertEquals($expected,$actual);
 
     }
+
+
 }

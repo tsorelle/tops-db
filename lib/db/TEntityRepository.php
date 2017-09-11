@@ -28,12 +28,17 @@ abstract class TEntityRepository implements IEntityRepository
         return $this->fieldDefinitions;
     }
 
+    protected function getLookupField() {
+        // may be overriden in subclass
+        return 'id';
+    }
+
     /**
      * @var PDO
      */
     private $connection = null;
 
-    private function getConnection() {
+    protected function getConnection() {
         if ($this->connection != null) {
             return $this->connection;
         }
@@ -185,6 +190,24 @@ abstract class TEntityRepository implements IEntityRepository
         return $result;
     }
 
+    public function getAll($includeInactive = false)
+    {
+        $dbh = $this->getConnection();
+        $sql = 'SELECT * FROM '.$this->getTableName();
+        if (!$includeInactive) {
+            $sql .= ' WHERE active=1';
+        }
+
+        /**
+         * @var PDOStatement
+         */
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute();
+
+        $result = $stmt->fetchAll(PDO::FETCH_CLASS,$this->getClassName());
+        return $result;
+    }
+
     public function delete($id)
     {
         $dbh = $this->getConnection();
@@ -203,32 +226,26 @@ abstract class TEntityRepository implements IEntityRepository
         return $this->updateValues($id,array('active' => 0));
     }
 
-    public function getAll($where = '',$includeInactive=false ) {
+    public function getEntity($value, $includeInactive=false, $fieldName=null) {
         $dbh = $this->getConnection();
-        $sql = "SELECT * ".'FROM '.$this->getTableName();
-        if ($where) {
-            $sql .= " WHERE $where";
+        if ($fieldName == null) {
+            $fieldName = $this->getLookupField();
         }
-
+        $sql = "SELECT * ".'FROM '.$this->getTableName(). " WHERE $fieldName = :value ";
         if (!$includeInactive) {
-            $sql .= (($where) ? ' AND ' : ' WHERE ').'active=1';
+            $sql .= ' AND active=1';
         }
 
         /**
          * @var PDOStatement
          */
         $stmt = $dbh->prepare($sql);
+        $stmt->bindValue(":value", $value);
+
+
         $stmt->execute();
 
         $result = $stmt->fetchAll(PDO::FETCH_CLASS,$this->getClassName());
-        return $result;
-    }
-
-    public function getFirst($where = '', $includeInactive = false) {
-        $result = $this->getAll($where,$includeInactive);
-        if (empty($result)) {
-            return false;
-        }
-        return $result[0];
+        return empty($result) ? false : $result[0];
     }
 }
