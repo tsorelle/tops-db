@@ -36,10 +36,7 @@ class PermissionsRepository extends TEntityRepository
     }
 
     protected function getLookupField() {
-        $result = new \stdClass();
-        $result->name='permissionName';
-        $result->type=PDO::PARAM_STR;
-        return $result;
+        return 'permissionName';
     }
 
     public function getPermission($permissionName) {

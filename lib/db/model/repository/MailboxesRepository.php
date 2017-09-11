@@ -42,9 +42,6 @@ class MailboxesRepository extends TEntityRepository
     }
 
     protected function getLookupField() {
-        $result = new \stdClass();
-        $result->name='mailboxcode';
-        $result->type=PDO::PARAM_STR;
-        return $result;
+        return 'mailboxcode';
     }
 }

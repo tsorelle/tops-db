@@ -63,8 +63,7 @@ class TModelBuilder
 
         $buildEntity = strpos($entityName, '\\') === false;
         $lookupField = @$params['lookupField'];
-        $lookupType = '';
-        
+
         $entityProperties = array();
         $fieldDefs = array();
         $isTimestamped = false;
@@ -92,9 +91,6 @@ class TModelBuilder
                     $entityProperties[] = '    public $' . $field->Field . ";";
                     $type = explode('(', $field->Type)[0];
                     $type = $type == 'int' ? 'INT' : 'STR';
-                    if ($field->Field == $lookupField) {
-                        $lookupType = "PDO::PARAM_$type";
-                    }
                     $fieldDefs[] = "'$fieldName'=>PDO::PARAM_$type";
                     break;
             }
@@ -165,10 +161,7 @@ class TModelBuilder
 
         if (!empty($lookupField)) {
             $code[] =  "    protected function getLookupField() {";
-            $code[] =  '        $result = new \\stdClass();';
-            $code[] =  '        $result->name='."'$lookupField';";
-            $code[] =  '        $result->type='.$lookupType.';';
-            $code[] =  '        return $result;';
+            $code[] =  "        return '$lookupField';";
             $code[] =  "    }";
         }
 
