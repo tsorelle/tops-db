@@ -29,8 +29,10 @@ abstract class TEntityRepository implements IEntityRepository
     }
 
     protected function getLookupField() {
-        // may be overriden in subclass
-        return 'id';
+        $result = new \stdClass();
+        $result->name = 'id';
+        $result->type = PDO::PARAM_INT;
+        return $result;
     }
 
     /**
@@ -66,19 +68,52 @@ abstract class TEntityRepository implements IEntityRepository
 
     /**
      * @param $id
-     * @return mixed
+     * @return object | bool
      */
     public function get($id) {
+        return $this->getSingleEntity('id = ?',[$id],true);
+    }
+
+    /**
+     * @param $sql
+     * @param array $params
+     * @return PDOStatement
+     */
+    protected function executeStatement($sql,$params = array()) {
         $dbh = $this->getConnection();
-        $sql = 'SELECT * '.'FROM '.$this->getTableName().' WHERE id = ?';
         /**
          * @var PDOStatement
          */
         $stmt = $dbh->prepare($sql);
-        $stmt->execute(array($id));
+        $stmt->execute($params);
+        return $stmt;
+    }
+
+    protected function executeEntityQuery($where,$params,$getAll=true,$includeInactive = false) {
+        $sql = 'SELECT * '.'FROM '.$this->getTableName().' WHERE '.$where;
+        if (!$includeInactive) {
+            $sql .= ' AND active=1';
+        }
+        $stmt = $this->executeStatement($sql,$params);
         $stmt->setFetchMode(PDO::FETCH_CLASS, $this->getClassName());
-        $result = $stmt->fetch();
+        if ($getAll) {
+            $result = $stmt->fetchAll();
+            if (empty($result)) {
+                return false;
+            }
+        }
+        else {
+            $result = $stmt->fetch();
+        }
         return $result;
+    }
+
+    protected function getSingleEntity($where,$params,$includeInactive = false) {
+        return $this->executeEntityQuery($where,$params,false,$includeInactive);
+    }
+
+    protected function getEntityCollection($where,$params,$includeInactive = false) {
+        return $this->executeEntityQuery($where,$params,true,$includeInactive);
     }
 
     public function updateValues($id, array $fields,  $userName = 'admin') {
@@ -229,7 +264,12 @@ abstract class TEntityRepository implements IEntityRepository
     public function getEntity($value, $includeInactive=false, $fieldName=null) {
         $dbh = $this->getConnection();
         if ($fieldName == null) {
-            $fieldName = $this->getLookupField();
+            $field = $this->getLookupField();
+            $fieldName = $field->name;
+            $type = $field->type;
+        }
+        else {
+            $type = PDO::PARAM_STR;
         }
         $sql = "SELECT * ".'FROM '.$this->getTableName(). " WHERE $fieldName = :value ";
         if (!$includeInactive) {
@@ -240,7 +280,7 @@ abstract class TEntityRepository implements IEntityRepository
          * @var PDOStatement
          */
         $stmt = $dbh->prepare($sql);
-        $stmt->bindValue(":value", $value);
+        $stmt->bindValue(":value", $value,$type);
 
 
         $stmt->execute();

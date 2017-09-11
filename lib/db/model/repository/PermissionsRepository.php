@@ -29,9 +29,17 @@ class PermissionsRepository extends TEntityRepository
     protected function getFieldDefinitionList()
     {
         return array(
-        'id'=>PDO::PARAM_INT,
-        'permissionName'=>PDO::PARAM_STR,
-        'description'=>PDO::PARAM_STR);
+            'id'=>PDO::PARAM_INT,
+            'permissionName'=>PDO::PARAM_STR,
+            'description'=>PDO::PARAM_STR,
+            'active'=>PDO::PARAM_STR);
+    }
+
+    protected function getLookupField() {
+        $result = new \stdClass();
+        $result->name='permissionName';
+        $result->type=PDO::PARAM_STR;
+        return $result;
     }
 
     public function getPermission($permissionName) {
@@ -60,8 +68,4 @@ class PermissionsRepository extends TEntityRepository
         return $permission;
     }
 
-    protected function getLookupField()
-    {
-        return 'permissionName';
-    }
 }

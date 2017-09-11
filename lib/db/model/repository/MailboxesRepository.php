@@ -33,11 +33,18 @@ class MailboxesRepository extends TEntityRepository
         'address'=>PDO::PARAM_STR,
         'displayText'=>PDO::PARAM_STR,
         'description'=>PDO::PARAM_STR,
-        'active'=>PDO::PARAM_STR);
+        'createdby'=>PDO::PARAM_STR,
+        'createdon'=>PDO::PARAM_STR,
+        'changedby'=>PDO::PARAM_STR,
+        'changedon'=>PDO::PARAM_STR,
+        'active'=>PDO::PARAM_STR,
+        'public'=>PDO::PARAM_STR);
     }
 
-    protected function getLookupField()
-    {
-        return 'mailboxcode';
+    protected function getLookupField() {
+        $result = new \stdClass();
+        $result->name='mailboxcode';
+        $result->type=PDO::PARAM_STR;
+        return $result;
     }
 }
