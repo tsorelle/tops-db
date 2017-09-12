@@ -63,6 +63,20 @@ class PermissionsRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixtur
 
     }
 
+    public function testAddRevokePermission() {
+        $roleName = 'test-role';
+        $permissionName = 'add mailbox';
+        $this->repository->assignPermission($roleName,$permissionName);
+        $permission = $this->repository->getPermission($permissionName);
+        $roles = $permission->getRoles();
+        $this->assertTrue(in_array($roleName,$roles),'Failed assign');
+
+        $this->repository->revokePermission($roleName,$permissionName);
+        $permission = $this->repository->getPermission($permissionName);
+        $roles = $permission->getRoles();
+        $this->assertFalse(in_array($roleName,$roles),'Failed revoke');
+    }
+
 
 
 }

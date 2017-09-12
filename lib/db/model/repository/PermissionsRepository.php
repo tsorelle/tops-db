@@ -65,4 +65,27 @@ class PermissionsRepository extends TEntityRepository
         return $permission;
     }
 
+    public function assignPermission($roleName, $permissionName) {
+        $permission = $this->getPermission($permissionName);
+        if (empty($permission)) {
+           return false;
+        }
+        if (!in_array($roleName,$permission->getRoles())) {
+            $sql = "INSERT INTO tops_rolepermissions (permissionId,roleName) VALUES   (?,?)";
+            $stmt = $this->executeStatement($sql,array($permission->getId(),$roleName));
+        }
+        return true;
+    }
+
+    public function revokePermission($roleName, $permissionName) {
+        $permission = $this->getPermission($permissionName);
+        if (empty($permission)) {
+            return false;
+        }
+        if (in_array($roleName,$permission->getRoles())) {
+            $sql = "DELETE FROM tops_rolepermissions WHERE permissionId = ? and roleName = ?";
+            $stmt = $this->executeStatement($sql,array($permission->getId(),$roleName));
+        }
+        return true;
+    }
 }
