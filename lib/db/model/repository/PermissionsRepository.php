@@ -18,6 +18,9 @@ class PermissionsRepository extends TEntityRepository
         return 'Tops\sys\TPermission';
     }
 
+    protected function getDetailTableName() {
+        return 'tops_rolepermissions';
+    }
     protected function getTableName() {
         return 'tops_permissions';
     }
@@ -52,7 +55,7 @@ class PermissionsRepository extends TEntityRepository
         $id = $permission->getId();
 
         $dbh = $this->getConnection();
-        $sql = 'SELECT roleName FROM tops_rolepermissions WHERE permissionId=?';
+        $sql = 'SELECT roleName FROM '.$this->getDetailTableName().' WHERE permissionId=?';
         /**
          * @var PDOStatement
          */
@@ -71,7 +74,7 @@ class PermissionsRepository extends TEntityRepository
            return false;
         }
         if (!in_array($roleName,$permission->getRoles())) {
-            $sql = "INSERT INTO tops_rolepermissions (permissionId,roleName) VALUES   (?,?)";
+            $sql = "INSERT INTO ".$this->getDetailTableName().' (permissionId,roleName) VALUES   (?,?)';
             $stmt = $this->executeStatement($sql,array($permission->getId(),$roleName));
         }
         return true;
@@ -83,8 +86,8 @@ class PermissionsRepository extends TEntityRepository
             return false;
         }
         if (in_array($roleName,$permission->getRoles())) {
-            $sql = "DELETE FROM tops_rolepermissions WHERE permissionId = ? and roleName = ?";
-            $stmt = $this->executeStatement($sql,array($permission->getId(),$roleName));
+            $sql = "DELETE FROM ".$this->getDetailTableName()." WHERE permissionId = ? and roleName = ?";
+            $this->executeStatement($sql,array($permission->getId(),$roleName));
         }
         return true;
     }
@@ -94,5 +97,23 @@ class PermissionsRepository extends TEntityRepository
         $permission->setPermissionName($permissionName);
         $permission->setDescription($description);
         $this->insert($permission,$username);
+    }
+
+
+    public function removeRolePermissions($roleName) {
+        $sql = 'delete from '.$this->getDetailTableName().' where roleName = ?';
+        $this->executeStatement($sql,[$roleName]);
+    }
+
+    public function removePermission($permissionName) {
+        $permission = $this->getPermission($permissionName);
+        if (empty($permission)) {
+            return false;
+        }
+        $id = $permission->getId();
+        $sql = 'delete from '.$this->getDetailTableName().' where permissionId = ?';
+        $this->executeStatement($sql,[$id]);
+        $sql = 'delete from '.$this->getTableName().' where id = ?';
+        $this->executeStatement($sql,[$id]);
     }
 }

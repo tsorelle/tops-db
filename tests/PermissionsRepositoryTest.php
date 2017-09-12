@@ -83,7 +83,53 @@ class PermissionsRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixtur
         $this->repository->addPermission($permissionName,$description);
         $permission = $this->repository->getPermission($permissionName);
         $this->assertNotEmpty($permission);
+    }
 
+    public function testRemovePermission() {
+        $permissionName = 'test permission';
+        $description = 'just a test';
+        $this->repository->addPermission($permissionName,$description);
+        $permission = $this->repository->getPermission($permissionName);
+        $this->assertNotEmpty($permission);
+        $this->repository->assignPermission('role1',$permissionName);
+        $this->repository->assignPermission('role2',$permissionName);
+        $permission = $this->repository->getPermission($permissionName);
+        $this->assertNotEmpty($permission);
+        $expected = 2;
+        $actual = sizeof($permission->getRoles());
+        $this->assertEquals($expected,$actual);
+
+        $this->repository->removePermission($permissionName);
+        $actual = $this->repository->getPermission($permissionName);
+        $this->assertFalse($actual,'Delete failed');
+    }
+
+    public function testRemovePermissionRole() {
+        $permissionName = 'test permission';
+        $permissionName2 = 'another test permission';
+        $description = 'just a test';
+        $this->repository->addPermission($permissionName,$description);
+        $permission = $this->repository->getPermission($permissionName);
+        $this->assertNotEmpty($permission);
+        $this->repository->assignPermission('role1',$permissionName);
+        $this->repository->assignPermission('role2',$permissionName);
+
+        $this->repository->addPermission($permissionName2,$description.' (2)');
+        $permission = $this->repository->getPermission($permissionName2);
+        $this->assertNotEmpty($permission);
+        $this->repository->assignPermission('role2',$permissionName2);
+
+        $this->repository->removeRolePermissions('role2');
+
+        $permission = $this->repository->getPermission($permissionName);
+        $this->assertNotEmpty($permission);
+        $roles = $permission->getRoles();
+        $this->assertFalse(in_array('role2',$roles));
+
+        $permission = $this->repository->getPermission($permissionName2);
+        $this->assertNotEmpty($permission);
+        $roles = $permission->getRoles();
+        $this->assertFalse(in_array('role2',$roles));
     }
 
 
