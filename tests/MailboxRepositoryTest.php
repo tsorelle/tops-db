@@ -8,6 +8,7 @@
 
 use PHPUnit\Framework\TestCase;
 use Tops\db\EntityRepositoryFactory;
+use Tops\db\model\repository\MailboxesRepository;
 use Tops\mail\TDbMailboxManager;
 
 class MailboxRepositoryTest extends TestCase
@@ -25,5 +26,18 @@ class MailboxRepositoryTest extends TestCase
         $id = $actual->getMailboxId();
         $description = $actual->getDescription();
         $this->assertEquals($expected,$actualCode);
+    }
+
+    public function testGetMailboxList() {
+
+        $manager = new TDBMailboxManager();
+        $actual = $manager->getMailboxes();
+        $this->assertNotEmpty($actual);
+        $expected = sizeof($actual);
+        $repository = new MailboxesRepository();
+        $unfiltered = $repository->getMailboxList(true);
+        $actual = sizeof($unfiltered);
+        $this->assertGreaterThan($expected,$actual);
+
     }
 }

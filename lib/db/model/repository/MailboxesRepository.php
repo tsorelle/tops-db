@@ -41,7 +41,30 @@ class MailboxesRepository extends TEntityRepository
         'public'=>PDO::PARAM_STR);
     }
 
+
     protected function getLookupField() {
         return 'mailboxcode';
+    }
+
+    public function getMailboxList($showAll=false) {
+
+        $params = array();
+        $fieldList = "mailboxcode,address,displayText, IFNULL(description,'') AS description";
+        $where = '';
+        if (!$showAll) {
+            $params = [1,1];
+            $fieldList .= ',active,public';
+            $where= " WHERE active = ? AND public = ?";
+        }
+
+        $sql = "SELECT $fieldList FROM ".$this->getTableName().$where;
+
+        $stmt = $this->executeStatement($sql,$params);
+        $stmt->setFetchMode(PDO::FETCH_OBJ);
+        $result = $stmt->fetchAll();
+        if (empty($result)) {
+            return false;
+        }
+        return $result;
     }
 }
