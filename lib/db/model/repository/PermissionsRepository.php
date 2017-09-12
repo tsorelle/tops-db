@@ -116,4 +116,11 @@ class PermissionsRepository extends TEntityRepository
         $sql = 'delete from '.$this->getTableName().' where id = ?';
         $this->executeStatement($sql,[$id]);
     }
+
+    public function delete($id)
+    {
+        $sql = 'delete from '.$this->getDetailTableName().' where permissionId = ?';
+        $this->executeStatement($sql,[$id]);
+        return parent::delete($id);
+    }
 }
