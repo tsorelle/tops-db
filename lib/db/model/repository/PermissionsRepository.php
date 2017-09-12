@@ -88,4 +88,11 @@ class PermissionsRepository extends TEntityRepository
         }
         return true;
     }
+
+    public function addPermission($permissionName,$description,$username='admin') {
+        $permission = new TPermission();
+        $permission->setPermissionName($permissionName);
+        $permission->setDescription($description);
+        $this->insert($permission,$username);
+    }
 }

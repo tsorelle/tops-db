@@ -1411,12 +1411,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tsorelle/tops.git",
-                "reference": "fc93fc18f1d61f40bc7949ca6356d281840bfea8"
+                "reference": "a9900930046791cbd2a3a021e7d6ac14d439fb31"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tsorelle/tops/zipball/fc93fc18f1d61f40bc7949ca6356d281840bfea8",
-                "reference": "fc93fc18f1d61f40bc7949ca6356d281840bfea8",
+                "url": "https://api.github.com/repos/tsorelle/tops/zipball/a9900930046791cbd2a3a021e7d6ac14d439fb31",
+                "reference": "a9900930046791cbd2a3a021e7d6ac14d439fb31",
                 "shasum": ""
             },
             "require": {
@@ -1444,7 +1444,7 @@
                 "source": "https://github.com/tsorelle/tops/tree/master",
                 "issues": "https://github.com/tsorelle/tops/issues"
             },
-            "time": "2017-09-12 13:11:15"
+            "time": "2017-09-12 13:56:48"
         },
         {
             "name": "webmozart/assert",

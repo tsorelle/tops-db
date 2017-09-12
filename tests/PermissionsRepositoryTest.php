@@ -77,6 +77,15 @@ class PermissionsRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixtur
         $this->assertFalse(in_array($roleName,$roles),'Failed revoke');
     }
 
+    public function testAddPermission() {
+        $permissionName = 'test permission';
+        $description = 'just a test';
+        $this->repository->addPermission($permissionName,$description);
+        $permission = $this->repository->getPermission($permissionName);
+        $this->assertNotEmpty($permission);
+
+    }
+
 
 
 }
