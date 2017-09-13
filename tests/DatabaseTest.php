@@ -171,4 +171,23 @@ class DatabaseTest extends TestCase
         $this->assertNotEmpty($tables);
         $this->assertNotNull($dbh);
     }
+
+    public function testTableExists() {
+        $this->ClearCaches();
+        $actusl = \Tops\db\TDatabase::tableExists('no such table');
+        $this->assertFalse($actusl);
+
+        $actusl = \Tops\db\TDatabase::tableExists('tops_mailboxes');
+        $this->assertTrue($actusl);
+    }
+
+    public function testRowCount() {
+        $this->ClearCaches();
+        $actusl = \Tops\db\TDatabase::rowCount('no such table');
+        $this->assertFalse($actusl);
+
+        $actusl = \Tops\db\TDatabase::rowCount('tops_mailboxes');
+        $this->assertTrue($actusl !== false);
+
+    }
 }

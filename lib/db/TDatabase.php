@@ -144,5 +144,40 @@ class TDatabase
         return $result;
     }
 
+    public static function tableExists($tableName, $connection=null) {
+        if (empty($connection)) {
+            $connection = null;
+        }
+        if (gettype($connection) !== 'object') {
+            $connection = self::getConnection($connection);
+        }
+        $sql = 'SELECT COUNT(*) as tableCount FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?';
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([$tableName]);
+        $result = $stmt->fetch();
+        return $result['tableCount'] != 0;
+    }
+
+    public static function rowCount($tableName, $connection=null)
+    {
+        if (empty($connection)) {
+            $connection = null;
+        }
+        if (gettype($connection) !== 'object') {
+            $connection = self::getConnection($connection);
+        }
+
+        if (self::tableExists($tableName,$connection)) {
+            $sql = 'SELECT COUNT(*) as rowCount FROM '.$tableName;
+            $stmt = $connection->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->fetch();
+            return  (int)$result['rowCount'];
+        }
+        return false;
+
+    }
+
+
 
 }

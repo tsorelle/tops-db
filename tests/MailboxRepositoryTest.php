@@ -11,8 +11,13 @@ use Tops\db\EntityRepositoryFactory;
 use Tops\db\model\repository\MailboxesRepository;
 use Tops\mail\TDbMailboxManager;
 
-class MailboxRepositoryTest extends TestCase
+class MailboxRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixture
 {
+    public function setUp()
+    {
+        $this->runSqlScript('new-mailboxes-table');
+    }
+
     public function testGetMailbox() {
         $manager = new TDBMailboxManager();
         $this->assertNotNull($manager);
@@ -37,7 +42,7 @@ class MailboxRepositoryTest extends TestCase
         $repository = new MailboxesRepository();
         $unfiltered = $repository->getMailboxList(true);
         $actual = sizeof($unfiltered);
-        $this->assertGreaterThan($expected,$actual);
+        $this->assertEquals($expected,$actual);
 
     }
 }
