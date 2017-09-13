@@ -123,4 +123,20 @@ class PermissionsRepository extends TEntityRepository
         $this->executeStatement($sql,[$id]);
         return parent::delete($id);
     }
+
+    public function getPermissionsList($showAll = false) {
+        $sql="SELECT permissionName, IFNULL(description,'') AS description, active FROM ".$this->getTableName();
+        if (!$showAll) {
+            $sql .= " WHERE active = 1";
+        }
+
+        $stmt = $this->executeStatement($sql);
+        $stmt->setFetchMode(PDO::FETCH_OBJ);
+        $result = $stmt->fetchAll();
+        if (empty($result)) {
+            return false;
+        }
+        return $result;
+
+    }
 }

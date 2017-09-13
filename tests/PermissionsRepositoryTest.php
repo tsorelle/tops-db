@@ -132,6 +132,10 @@ class PermissionsRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixtur
         $this->assertFalse(in_array('role2',$roles));
     }
 
+    public function testGetPermissionsList() {
+        $actual = $this->repository->getPermissionsList();
+        $this->assertNotEmpty($actual);
+    }
 
 
 }
