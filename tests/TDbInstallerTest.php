@@ -13,7 +13,9 @@ class TDbInstallerTest extends TestCase
 {
     public function testTopsSchemaInstall() {
         $installer = new TDbInstaller();
-        $actual = $installer->installTopsSchema(null,'tests/files/install/sql');
+        $inipath = realpath(__DIR__.'/files/install');
+        $ini = \Tops\sys\TIniSettings::Create('install.ini',$inipath);
+        $actual = $installer->installSchema($ini,'tests/files/install/sql');
         $this->assertNotEmpty($actual);
         print_r($actual);
     }

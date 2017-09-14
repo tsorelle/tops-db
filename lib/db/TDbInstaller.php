@@ -10,34 +10,29 @@ namespace Tops\db;
 
 
 use Tops\sys\TConfiguration;
+use Tops\sys\TIniSettings;
 use Tops\sys\TPath;
 
 class TDbInstaller
 {
     private $log = array();
 
-    private $topsTables = array(
-        'tops_rolepermissions',
-        'tops_permissions',
-        'tops_mailboxes'
-    );
-
-    public function installTopsSchema($databaseName='tops-db', $scriptPath='application/install/sql') {
+    public function installSchema(TIniSettings $config, $scriptPath='application/install') {
+        $databaseName = $config->getValue('database','settings',null);
         $connection = TDatabase::getConnection($databaseName);
-
-        foreach ($this->topsTables as $tableName) {
-            $this->createTable($tableName,$scriptPath,$connection);
+        $tables = $config->getSection('tables');
+        foreach ($tables as $tableName => $expectedCount) {
+            $this->createTable($tableName,$expectedCount, $scriptPath, $connection);
         }
-
         if (empty($this->log)) {
-            $this->log[] = 'Tops schema: no changes needed.';
+            $this->log[] = 'Schema: no changes needed.';
         }
         return $this->log;
     }
 
-    protected function createTable($tableName,$scriptPath,$connection) {
+    protected function createTable($tableName,$expectedRowCount, $scriptPath,$connection) {
         $result = TDatabase::rowCount($tableName);
-        if ($result === false) {
+        if ($result === false || $result < $expectedRowCount) {
             $token=\Tops\sys\TSession::GetSecurityToken();
             $script = TPath::fromFileRoot($scriptPath).'/'."create-table-$tableName.sql";
             TDatabase::ExecuteSql($token,$script,$connection);
