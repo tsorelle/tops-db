@@ -13,7 +13,7 @@ class TDbInstallerTest extends TestCase
 {
     public function testTopsSchemaInstall() {
         $installer = new TDbInstaller();
-        $actual = $installer->installTopsSchema('tests/files/install/sql');
+        $actual = $installer->installTopsSchema(null,'tests/files/install/sql');
         $this->assertNotEmpty($actual);
         print_r($actual);
     }

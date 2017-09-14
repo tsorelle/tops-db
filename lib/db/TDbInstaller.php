@@ -22,12 +22,13 @@ class TDbInstaller
         'tops_mailboxes'
     );
 
-    public function installTopsSchema($scriptPath='application/install/sql', $databaseName=null) {
-        $scriptLocation = TPath::fromFileRoot($scriptPath);
+    public function installTopsSchema($databaseName='tops-db', $scriptPath='application/install/sql') {
         $connection = TDatabase::getConnection($databaseName);
+
         foreach ($this->topsTables as $tableName) {
-            $result = $this->createTable($tableName,$scriptPath,$connection);
+            $this->createTable($tableName,$scriptPath,$connection);
         }
+
         if (empty($this->log)) {
             $this->log[] = 'Tops schema: no changes needed.';
         }
