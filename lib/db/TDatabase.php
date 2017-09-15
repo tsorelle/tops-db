@@ -137,7 +137,7 @@ class TDatabase
         }
         $sql = file_get_contents($script);
         if (empty($sql)) {
-            throw new Exception('SQL Script not found.');
+            throw new \Exception('SQL Script not found.');
         }
         $query = $connection->prepare($sql);
         $result = $query->execute();
