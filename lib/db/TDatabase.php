@@ -135,7 +135,7 @@ class TDatabase
         if (gettype($connection) !== 'object') {
             $connection = self::getConnection($connection);
         }
-        $sql = file_get_contents($script);
+        $sql = @file_get_contents($script);
         if (empty($sql)) {
             throw new \Exception('SQL Script not found.');
         }
