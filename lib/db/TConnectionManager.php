@@ -18,15 +18,15 @@ abstract class TConnectionManager
         $server = 'localhost')
     {
         $result = new \stdClass();
-        $result->database = $database;
         $result->user = $user;
         $result->pwd = $pwd;
-        if ($server != 'localhost' && !empty($server)) {
-            $result->server = $server;
+        if (empty($server)) {
+            $server = 'localhost';
         }
+        $result->dsn = "mysql:host=$server;dbname=$database";
+
         return $result;
     }
-
 
     abstract public function getNativeConfiguration();
 }
