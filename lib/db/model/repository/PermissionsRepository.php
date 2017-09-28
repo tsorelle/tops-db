@@ -11,6 +11,7 @@ use PDOStatement;
 use Tops\db\TDatabase;
 use Tops\db\TEntityRepository;
 use Tops\sys\TPermission;
+use Tops\sys\TStrings;
 
 class PermissionsRepository extends TEntityRepository 
 {
@@ -43,6 +44,7 @@ class PermissionsRepository extends TEntityRepository
     }
 
     public function getPermission($permissionName) {
+        $permissionName = TStrings::convertNameFormat($permissionName, TStrings::initialCapFormat);
 
         /**
          * @var $permission TPermission
@@ -69,6 +71,8 @@ class PermissionsRepository extends TEntityRepository
     }
 
     public function assignPermission($roleName, $permissionName) {
+        $permissionName = TStrings::convertNameFormat($permissionName, TStrings::initialCapFormat);
+        $roleName = TStrings::convertNameFormat($roleName, TStrings::initialCapFormat);
         $permission = $this->getPermission($permissionName);
         if (empty($permission)) {
            return false;
@@ -81,6 +85,7 @@ class PermissionsRepository extends TEntityRepository
     }
 
     public function revokePermission($roleName, $permissionName) {
+        $roleName = TStrings::convertNameFormat($roleName, TStrings::initialCapFormat);
         $permission = $this->getPermission($permissionName);
         if (empty($permission)) {
             return false;
@@ -93,6 +98,7 @@ class PermissionsRepository extends TEntityRepository
     }
 
     public function addPermission($permissionName,$description,$username='admin') {
+        $permissionName = TStrings::convertNameFormat($permissionName, TStrings::initialCapFormat);
         $permission = new TPermission();
         $permission->setPermissionName($permissionName);
         $permission->setDescription($description);
@@ -101,6 +107,7 @@ class PermissionsRepository extends TEntityRepository
 
 
     public function removeRolePermissions($roleName) {
+        $roleName = TStrings::convertNameFormat($roleName, TStrings::initialCapFormat);
         $sql = 'delete from '.$this->getDetailTableName().' where roleName = ?';
         $this->executeStatement($sql,[$roleName]);
     }
@@ -139,4 +146,5 @@ class PermissionsRepository extends TEntityRepository
         return $result;
 
     }
+
 }

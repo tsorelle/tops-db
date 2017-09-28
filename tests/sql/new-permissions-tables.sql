@@ -29,8 +29,8 @@ CREATE TABLE `tops_permissions` (
 /*Data for the table `tops_permissions` */
 
 insert  into `tops_permissions`(`id`,`permissionName`,`description`) values 
-(1,'add mailbox','Add a mailbox'),
-(2,'update mailboxes','Manage mailbox list');
+(1,'Add mailbox','Add a mailbox'),
+(2,'Update mailboxes','Manage mailbox list');
 
 /*Table structure for table `tops_rolepermissions` */
 
@@ -47,9 +47,9 @@ CREATE TABLE `tops_rolepermissions` (
 /*Data for the table `tops_rolepermissions` */
 
 insert  into `tops_rolepermissions`(`id`,`permissionId`,`roleName`) values 
-(1,1,'administrator'),
-(2,2,'administrator'),
-(3,2,'qnut_admin');
+(1,1,'Administrator'),
+(2,2,'Administrator'),
+(3,2,'Peanut Administrator');
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

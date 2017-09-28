@@ -46,8 +46,8 @@ class PermissionsRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixtur
         $actual = $permission->check('administrator');
         $this->assertTrue($actual,'admin should have permission');
 
-        $actual = $permission->check('qnut_admin');
-        $this->assertTrue($actual,'qnut_admin should have permission');
+        $actual = $permission->check('peanut administrator');
+        $this->assertTrue($actual,'peanut admin should have permission');
 
         $permission = $this->repository->getPermission("add mailbox");
         $this->assertNotEmpty($permission);
@@ -64,12 +64,15 @@ class PermissionsRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixtur
     }
 
     public function testAddRevokePermission() {
-        $roleName = 'test-role';
+        $roleName = 'test role';
         $permissionName = 'add mailbox';
         $this->repository->assignPermission($roleName,$permissionName);
         $permission = $this->repository->getPermission($permissionName);
         $roles = $permission->getRoles();
-        $this->assertTrue(in_array($roleName,$roles),'Failed assign');
+        $this->assertTrue(in_array(
+            \Tops\sys\TStrings::convertNameFormat($roleName, \Tops\sys\TStrings::wordCapsFormat),
+
+            $roles),'Failed assign');
 
         $this->repository->revokePermission($roleName,$permissionName);
         $permission = $this->repository->getPermission($permissionName);
