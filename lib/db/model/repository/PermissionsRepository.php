@@ -106,6 +106,33 @@ class PermissionsRepository extends TEntityRepository
     }
 
 
+    /**
+     * @param string $roleName
+     * @return bool
+     */
+    public function removeRole($roleName) {
+        $roleName = TStrings::convertNameFormat($roleName, TStrings::initialCapFormat);
+        $sql = 'delete from '.$this->getDetailTableName().' where roleName = ?';
+        $this->executeStatement($sql,[$roleName]);
+        return true;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getRoles() {
+        $sql = 'select distinct roleName from '.$this->getDetailTableName();
+        $stmt = $this->executeStatement($sql);
+        $stmt->setFetchMode(PDO::FETCH_OBJ);
+        $roles = $stmt->fetchAll();
+        $result = [];
+        foreach ($roles as $role) {
+            $result[] = $role->roleName;
+        }
+        return $result;
+
+    }
+
     public function removeRolePermissions($roleName) {
         $roleName = TStrings::convertNameFormat($roleName, TStrings::initialCapFormat);
         $sql = 'delete from '.$this->getDetailTableName().' where roleName = ?';
