@@ -106,4 +106,9 @@ class TDBPermissionsManager implements IPermissionsManager
     {
         return $this->getRepository()->revokePermission($roleName,$permissionName);
     }
+
+    public function verifyPermission($permissionName)
+    {
+        // TODO: Implement verifyPermission() method.
+    }
 }
