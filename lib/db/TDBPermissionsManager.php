@@ -52,17 +52,25 @@ class TDBPermissionsManager implements IPermissionsManager
 
     private $roles;
     /**
-     * @return string[]
+     * @return [];
+     *
+     * return array of stdClass
+     *  interface ILookupItem {
+     *     Key: any;
+     *     Text: string;
+     *     Description: string;
+     *   }
      */
     public function getRoles()
     {
         if (!isset($roles)) {
             $this->roles = array();
             $roles = $this->getRepository()->getRoles();
-            foreach ($roles as $name) {
+            foreach ($roles as $role) {
                 $item = new \stdClass();
-                $item->Name = $name;
-                $item->Description = TStrings::ConvertNameFormat($name,IPermissionsManager::roleDescriptionFormat);
+                $item ->Key = $role;
+                $item ->Text = TStrings::ConvertNameFormat($role,IPermissionsManager::roleNameFormat);
+                $item ->Description = TStrings::ConvertNameFormat($role,IPermissionsManager::roleDescriptionFormat);
                 $result[] = $item;
             }
         }
