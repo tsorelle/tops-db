@@ -13,6 +13,7 @@ use Tops\db\EntityRepositoryFactory;
 use Tops\db\model\repository\PermissionsRepository;
 use Tops\sys\IPermissionsManager;
 use Tops\sys\TPermission;
+use Tops\sys\TStrings;
 
 class TDBPermissionsManager implements IPermissionsManager
 {
@@ -49,12 +50,23 @@ class TDBPermissionsManager implements IPermissionsManager
         return $this->getRepository()->removeRole($roleName);
     }
 
+    private $roles;
     /**
      * @return string[]
      */
     public function getRoles()
     {
-        return $this->getRepository()->getRoles();
+        if (!isset($roles)) {
+            $this->roles = array();
+            $roles = $this->getRepository()->getRoles();
+            foreach ($roles as $name) {
+                $item = new \stdClass();
+                $item->Name = $name;
+                $item->Description = TStrings::ConvertNameFormat($name,IPermissionsManager::roleDescriptionFormat);
+                $result[] = $item;
+            }
+        }
+        return $this->roles;
     }
 
     /**
@@ -107,8 +119,4 @@ class TDBPermissionsManager implements IPermissionsManager
         return $this->getRepository()->revokePermission($roleName,$permissionName);
     }
 
-    public function verifyPermission($permissionName)
-    {
-        // TODO: Implement verifyPermission() method.
-    }
 }
