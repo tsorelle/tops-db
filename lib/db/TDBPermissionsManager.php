@@ -82,8 +82,17 @@ class TDBPermissionsManager implements IPermissionsManager
      */
     public function getPermissions()
     {
-        return $this->getRepository()->getAll();
-
+        /**
+         * @var $permissions TPermission[]
+         */
+        $permissions = $this->getRepository()->getAll();
+        foreach($permissions as $permission) {
+            $roles = $this->getRepository()->getPermissionRoles($permission);
+            foreach ($roles as $role) {
+                $permission->addRole($role[0]);
+            }
+        }
+        return $permissions;
     }
 
     public function addPermission($name, $description=null)

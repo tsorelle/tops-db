@@ -43,6 +43,19 @@ class PermissionsRepository extends TEntityRepository
         return 'permissionName';
     }
 
+    public function getPermissionRoles($permission) {
+        $id = $permission->getId();
+
+        $dbh = $this->getConnection();
+        $sql = 'SELECT roleName FROM '.$this->getDetailTableName().' WHERE permissionId=?';
+        /**
+         * @var PDOStatement
+         */
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetchAll();
+    }
+
     public function getPermission($permissionName) {
         $permissionName = TStrings::convertNameFormat($permissionName, IPermissionsManager::permisssionNameFormat);
 
@@ -53,17 +66,7 @@ class PermissionsRepository extends TEntityRepository
         if (empty($permission)) {
             return false;
         }
-
-        $id = $permission->getId();
-
-        $dbh = $this->getConnection();
-        $sql = 'SELECT roleName FROM '.$this->getDetailTableName().' WHERE permissionId=?';
-        /**
-         * @var PDOStatement
-         */
-        $stmt = $dbh->prepare($sql);
-        $stmt->execute([$id]);
-        $roles = $stmt->fetchAll();
+        $roles = $this->getPermissionRoles($permission);
         foreach ($roles as $role) {
             $permission->addRole($role[0]);
         }
