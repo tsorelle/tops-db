@@ -86,7 +86,7 @@ class TDBPermissionsManager implements IPermissionsManager
 
     }
 
-    public function addPermission($name, $description)
+    public function addPermission($name, $description=null)
     {
         if (empty($description)) {
             $description = TStrings::ConvertNameFormat($name,IPermissionsManager::permissionDescriptionFormat);
