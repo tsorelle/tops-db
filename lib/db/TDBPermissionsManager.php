@@ -69,7 +69,7 @@ class TDBPermissionsManager implements IPermissionsManager
             foreach ($roles as $role) {
                 $item = new \stdClass();
                 $item ->Key = $role;
-                $item ->Text = TStrings::ConvertNameFormat($role,IPermissionsManager::roleNameFormat);
+                $item ->Name = TStrings::ConvertNameFormat($role,IPermissionsManager::roleNameFormat);
                 $item ->Description = TStrings::ConvertNameFormat($role,IPermissionsManager::roleDescriptionFormat);
                 $result[] = $item;
             }

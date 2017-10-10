@@ -9,6 +9,8 @@
 use Tops\db\EntityRepositoryFactory;
 use Tops\db\model\repository\PermissionsRepository;
 use PHPUnit\Framework\TestCase;
+use Tops\sys\IPermissionsManager;
+use Tops\sys\TStrings;
 
 class PermissionsRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixture
 {
@@ -37,7 +39,7 @@ class PermissionsRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixtur
          * @var $permission \Tops\sys\TPermission
          */
         // $permission = $this->repository->getFirst("permissionName='update mailboxes'");
-        $permission = $this->repository->getPermission("update mailboxes");
+        $permission = $this->repository->getPermission("update-mailboxes");
         $this->assertNotEmpty($permission);
         $expected = 'Manage mailbox list';
         $actual = $permission->getDescription();
@@ -66,18 +68,17 @@ class PermissionsRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixtur
     public function testAddRevokePermission() {
         $roleName = 'test role';
         $permissionName = 'add mailbox';
-        $this->repository->assignPermission($roleName,$permissionName);
+        $this->repository->assignPermission($roleName, $permissionName);
         $permission = $this->repository->getPermission($permissionName);
         $roles = $permission->getRoles();
-        $this->assertTrue(in_array(
-            \Tops\sys\TStrings::convertNameFormat($roleName, \Tops\sys\TStrings::wordCapsFormat),
-
-            $roles),'Failed assign');
+        $formattedRoleName = TStrings::convertNameFormat($roleName, IPermissionsManager::roleKeyFormat);
+        $this->assertTrue(in_array($formattedRoleName,$roles),'Failed assign');
 
         $this->repository->revokePermission($roleName,$permissionName);
         $permission = $this->repository->getPermission($permissionName);
         $roles = $permission->getRoles();
-        $this->assertFalse(in_array($roleName,$roles),'Failed revoke');
+        $hasRole = in_array($formattedRoleName,$roles);
+        $this->assertFalse($hasRole,'Failed revoke');
     }
 
     public function testAddPermission() {
