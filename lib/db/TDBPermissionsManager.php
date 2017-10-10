@@ -88,6 +88,9 @@ class TDBPermissionsManager implements IPermissionsManager
 
     public function addPermission($name, $description)
     {
+        if (empty($description)) {
+            $description = TStrings::ConvertNameFormat($name,IPermissionsManager::permissionDescriptionFormat);
+        }
         $existing = $this->getPermission($name);
         if (empty($existing)) {
             return $this->getRepository()->addPermission($name,$description);
