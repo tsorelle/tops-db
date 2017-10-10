@@ -88,7 +88,11 @@ class TDBPermissionsManager implements IPermissionsManager
 
     public function addPermission($name, $description)
     {
-        return $this->getRepository()->addPermission($name,$description);
+        $existing = $this->getPermission($name);
+        if (empty($existing)) {
+            return $this->getRepository()->addPermission($name,$description);
+        }
+        return false;
     }
 
     public function removePermission($name)
@@ -114,7 +118,6 @@ class TDBPermissionsManager implements IPermissionsManager
     public function assignPermission($roleName, $permissionName)
     {
         return $this->getRepository()->assignPermission($roleName,$permissionName);
-
     }
 
     /**
