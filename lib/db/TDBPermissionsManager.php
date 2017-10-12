@@ -9,13 +9,12 @@
 namespace Tops\db;
 
 
-use Tops\db\EntityRepositoryFactory;
 use Tops\db\model\repository\PermissionsRepository;
-use Tops\sys\IPermissionsManager;
+use Tops\sys\TPermissionsManager;
 use Tops\sys\TPermission;
 use Tops\sys\TStrings;
 
-class TDBPermissionsManager implements IPermissionsManager
+class TDBPermissionsManager extends TPermissionsManager
 {
     /**
      * @var PermissionsRepository
@@ -69,8 +68,8 @@ class TDBPermissionsManager implements IPermissionsManager
             foreach ($roles as $role) {
                 $item = new \stdClass();
                 $item ->Key = $role;
-                $item ->Name = TStrings::ConvertNameFormat($role,IPermissionsManager::roleNameFormat);
-                $item ->Description = TStrings::ConvertNameFormat($role,IPermissionsManager::roleDescriptionFormat);
+                $item ->Name = TStrings::ConvertNameFormat($role,TPermissionsManager::roleNameFormat);
+                $item ->Description = TStrings::ConvertNameFormat($role,TPermissionsManager::roleDescriptionFormat);
                 $result[] = $item;
             }
         }
@@ -100,7 +99,7 @@ class TDBPermissionsManager implements IPermissionsManager
         $existing = $this->getPermission($name);
         if (empty($existing)) {
             if (empty($description)) {
-                $description = TStrings::ConvertNameFormat($name,IPermissionsManager::permissionDescriptionFormat);
+                $description = TStrings::ConvertNameFormat($name,TPermissionsManager::permissionDescriptionFormat);
             }
             return $this->getRepository()->addPermission($name,$description);
         }

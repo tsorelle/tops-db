@@ -7,7 +7,7 @@ namespace Tops\db\model\repository;
 
 use \PDO;
 use Tops\db\TEntityRepository;
-use Tops\sys\IPermissionsManager;
+use Tops\sys\TPermissionsManager;
 use Tops\sys\TBasicPermission;
 use Tops\sys\TStrings;
 
@@ -40,7 +40,7 @@ class BasicPermissionsRepository extends TEntityRepository
 
     public function getPermission($permissionName) {
 
-        $permissionName = TStrings::convertNameFormat($permissionName, IPermissionsManager::permisssionNameFormat);
+        $permissionName = TStrings::convertNameFormat($permissionName, TPermissionsManager::permisssionNameFormat);
         /**
          * @var $permission \Tops\sys\TBasicPermission
          */
@@ -53,8 +53,8 @@ class BasicPermissionsRepository extends TEntityRepository
     }
 
     public function addPermission($permissionName,$description,$username='admin') {
-        $permissionName = TStrings::convertNameFormat($permissionName,IPermissionsManager::permisssionNameFormat);
-        $description = TStrings::convertNameFormat($permissionName,IPermissionsManager::permissionDescriptionFormat);
+        $permissionName = TStrings::convertNameFormat($permissionName,TPermissionsManager::permisssionNameFormat);
+        $description = TStrings::convertNameFormat($permissionName,TPermissionsManager::permissionDescriptionFormat);
         $permission = new TBasicPermission();
         $permission->setPermissionName($permissionName);
         $permission->setDescription($description);

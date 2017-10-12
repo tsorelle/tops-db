@@ -9,7 +9,7 @@
 use Tops\db\EntityRepositoryFactory;
 use Tops\db\model\repository\PermissionsRepository;
 use PHPUnit\Framework\TestCase;
-use Tops\sys\IPermissionsManager;
+use Tops\sys\TPermissionsManager;
 use Tops\sys\TStrings;
 
 class PermissionsRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixture
@@ -71,7 +71,7 @@ class PermissionsRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixtur
         $this->repository->assignPermission($roleName, $permissionName);
         $permission = $this->repository->getPermission($permissionName);
         $roles = $permission->getRoles();
-        $formattedRoleName = TStrings::convertNameFormat($roleName, IPermissionsManager::roleKeyFormat);
+        $formattedRoleName = TStrings::convertNameFormat($roleName, TPermissionsManager::roleKeyFormat);
         $this->assertTrue(in_array($formattedRoleName,$roles),'Failed assign');
 
         $this->repository->revokePermission($roleName,$permissionName);
