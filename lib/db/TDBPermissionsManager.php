@@ -36,8 +36,8 @@ class TDBPermissionsManager extends TPermissionsManager
      */
     public function addRole($roleName, $roleDescription = null)
     {
-
-        // not implemented. Roles are added by assignPermission
+        // override in sub class
+        return true;
     }
 
     /**
@@ -46,6 +46,7 @@ class TDBPermissionsManager extends TPermissionsManager
      */
     public function removeRole($roleName)
     {
+        // if native roles are used, override
         return $this->getRepository()->removeRole($roleName);
     }
 
