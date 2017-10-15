@@ -15,6 +15,15 @@ use Tops\sys\TStrings;
 
 class PermissionsRepository extends TEntityRepository 
 {
+    private function formatKey($name)
+    {
+        return TStrings::ConvertNameFormat($name,TStrings::dashedFormat);
+    }
+
+    private function formatDescription($name) {
+        return TStrings::ConvertNameFormat($name,TStrings::initialCapFormat);
+    }
+
     protected function getClassName() {
         return 'Tops\sys\TPermission';
     }
@@ -57,7 +66,7 @@ class PermissionsRepository extends TEntityRepository
     }
 
     public function getPermission($permissionName) {
-        $permissionName = TStrings::convertNameFormat($permissionName, TPermissionsManager::permisssionNameFormat);
+        $permissionName = $this->formatKey($permissionName);
 
         /**
          * @var $permission TPermission
@@ -74,8 +83,8 @@ class PermissionsRepository extends TEntityRepository
     }
 
     public function assignPermission($roleName, $permissionName) {
-        $permissionName = TStrings::convertNameFormat($permissionName, TPermissionsManager::permisssionNameFormat);
-        $roleName = TStrings::convertNameFormat($roleName, TPermissionsManager::roleKeyFormat);
+        $permissionName = $this->formatKey($permissionName);
+        $roleName = $this->formatKey($roleName);
         $permission = $this->getPermission($permissionName);
         if (empty($permission)) {
            return false;
@@ -88,7 +97,7 @@ class PermissionsRepository extends TEntityRepository
     }
 
     public function revokePermission($roleName, $permissionName) {
-        $roleName = TStrings::convertNameFormat($roleName, TPermissionsManager::roleKeyFormat);
+        $roleName = $this->formatKey($roleName);
         $permission = $this->getPermission($permissionName);
         if (empty($permission)) {
             return false;
@@ -100,21 +109,23 @@ class PermissionsRepository extends TEntityRepository
         return true;
     }
 
-    public function addPermission($permissionName,$description,$username='admin') {
-        $permissionName = TStrings::convertNameFormat($permissionName, TPermissionsManager::permisssionNameFormat);
+    public function addPermission($permissionName,$description=null,$username='admin') {
         $permission = new TPermission();
-        $permission->setPermissionName($permissionName);
-        $permission->setDescription($description);
+        if (empty($description)) {
+            $description = $permissionName;
+        }
+
+        $permission->setPermissionName($this->formatKey($permissionName));
+        $permission->setDescription($this->formatDescription($description));
         $this->insert($permission,$username);
     }
-
 
     /**
      * @param string $roleName
      * @return bool
      */
     public function removeRole($roleName) {
-        $roleName = TStrings::convertNameFormat($roleName, TPermissionsManager::roleKeyFormat);
+        $roleName = $this->formatDescription($roleName);
         $sql = 'delete from '.$this->getDetailTableName().' where roleName = ?';
         $this->executeStatement($sql,[$roleName]);
         return true;
@@ -133,11 +144,10 @@ class PermissionsRepository extends TEntityRepository
             $result[] = $role->roleName;
         }
         return $result;
-
     }
 
     public function removeRolePermissions($roleName) {
-        $roleName = TStrings::convertNameFormat($roleName, TPermissionsManager::roleKeyFormat);
+        $roleName = $this->formatKey($roleName);
         $sql = 'delete from '.$this->getDetailTableName().' where roleName = ?';
         $this->executeStatement($sql,[$roleName]);
     }

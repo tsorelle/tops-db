@@ -41,13 +41,13 @@ class TDBPermissionsManager extends TPermissionsManager
     }
 
     /**
-     * @param string $roleName
+     * @param string $roleHandle
      * @return bool
      */
-    public function removeRole($roleName)
+    public function removeRole($roleHandle)
     {
         // if native roles are used, override
-        return $this->getRepository()->removeRole($roleName);
+        return $this->getRepository()->removeRole($roleHandle);
     }
 
     private $roles;
@@ -65,13 +65,9 @@ class TDBPermissionsManager extends TPermissionsManager
     {
         if (!isset($roles)) {
             $this->roles = array();
-            $roles = $this->getRepository()->getRoles();
-            foreach ($roles as $role) {
-                $item = new \stdClass();
-                $item ->Key = $role;
-                $item ->Name = TStrings::ConvertNameFormat($role,TPermissionsManager::roleNameFormat);
-                $item ->Description = TStrings::ConvertNameFormat($role,TPermissionsManager::roleDescriptionFormat);
-                $result[] = $item;
+            $roleNames = $this->getRepository()->getRoles();
+            foreach ($roleNames as $roleName) {
+                $result[] = $this->createRoleObject($roleName);
             }
         }
         return $this->roles;
@@ -100,9 +96,10 @@ class TDBPermissionsManager extends TPermissionsManager
         $existing = $this->getPermission($name);
         if (empty($existing)) {
             if (empty($description)) {
-                $description = TStrings::ConvertNameFormat($name,TPermissionsManager::permissionDescriptionFormat);
+                $description = $name;
             }
-            return $this->getRepository()->addPermission($name,$description);
+            return $this->getRepository()->addPermission(
+                $name,$description);
         }
         return false;
     }

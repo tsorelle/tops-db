@@ -71,7 +71,7 @@ class PermissionsRepositoryTest extends \TwoQuakers\testing\RepositoryTestFixtur
         $this->repository->assignPermission($roleName, $permissionName);
         $permission = $this->repository->getPermission($permissionName);
         $roles = $permission->getRoles();
-        $formattedRoleName = TStrings::convertNameFormat($roleName, TPermissionsManager::roleKeyFormat);
+        $formattedRoleName = TStrings::convertNameFormat($roleName, TStrings::dashedFormat);
         $this->assertTrue(in_array($formattedRoleName,$roles),'Failed assign');
 
         $this->repository->revokePermission($roleName,$permissionName);

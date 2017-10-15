@@ -40,7 +40,7 @@ class BasicPermissionsRepository extends TEntityRepository
 
     public function getPermission($permissionName) {
 
-        $permissionName = TStrings::convertNameFormat($permissionName, TPermissionsManager::permisssionNameFormat);
+        $permissionName = TStrings::convertNameFormat($permissionName, TStrings::dashedFormat);
         /**
          * @var $permission \Tops\sys\TBasicPermission
          */
@@ -53,8 +53,8 @@ class BasicPermissionsRepository extends TEntityRepository
     }
 
     public function addPermission($permissionName,$description,$username='admin') {
-        $permissionName = TStrings::convertNameFormat($permissionName,TPermissionsManager::permisssionNameFormat);
-        $description = TStrings::convertNameFormat($permissionName,TPermissionsManager::permissionDescriptionFormat);
+        $permissionName = TStrings::convertNameFormat($permissionName,TStrings::dashedFormat);
+        $description = TStrings::convertNameFormat($permissionName,TStrings::initialCapFormat);
         $permission = new TBasicPermission();
         $permission->setPermissionName($permissionName);
         $permission->setDescription($description);
