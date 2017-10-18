@@ -52,7 +52,7 @@ class TModelBuilder
         }
 
         $entityName = @$params['entity'];
-        if (empty($entity)) {
+        if (empty($entityName)) {
             $len = strlen($repository);
             if (substr($repository, $len - 2) == 'es') {
                 $entityName = substr($repository, 0, $len - 2);
@@ -245,8 +245,11 @@ class TModelBuilder
 
         foreach ($tables as $table) {
             if (array_key_exists($table,$include)) {
-
-                self::buildSource($table,$config[$table],$databaseKey);
+                $tableInfo = @$config[$table];
+                if (!is_array($tableInfo)) {
+                    $tableInfo = [];
+                }
+                self::buildSource($table,$tableInfo,$databaseKey);
             }
         }
 
