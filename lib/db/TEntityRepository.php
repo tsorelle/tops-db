@@ -257,6 +257,11 @@ abstract class TEntityRepository implements IEntityRepository
         return $this->updateValues($id,array('active' => 0));
     }
 
+    public function restore($id) {
+        $dbh = $this->getConnection();
+        return $this->updateValues($id,array('active' => 1));
+    }
+
     public function getEntity($value, $includeInactive=false, $fieldName=null) {
         $fieldName = $this->getLookupField();
         return $this->getSingleEntity("$fieldName = ?",[$value],$includeInactive);

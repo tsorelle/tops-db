@@ -31,7 +31,7 @@ class MailboxesRepository extends TEntityRepository
         'id'=>PDO::PARAM_INT,
         'mailboxcode'=>PDO::PARAM_STR,
         'address'=>PDO::PARAM_STR,
-        'displayText'=>PDO::PARAM_STR,
+        'displaytext'=>PDO::PARAM_STR,
         'description'=>PDO::PARAM_STR,
         'createdby'=>PDO::PARAM_STR,
         'createdon'=>PDO::PARAM_STR,
@@ -49,7 +49,7 @@ class MailboxesRepository extends TEntityRepository
     public function getMailboxList($showAll=false) {
 
         $params = array();
-        $fieldList = "mailboxcode,address,displayText, IFNULL(description,'') AS description";
+        $fieldList = "mailboxcode,address,displaytext, IFNULL(description,'') AS description";
         $where = '';
         if (!$showAll) {
             $params = [1,1];
