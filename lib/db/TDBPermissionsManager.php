@@ -63,11 +63,12 @@ class TDBPermissionsManager extends TPermissionsManager
      */
     public function getRoles()
     {
+        // Usually this will be overridden in sub class
         if (!isset($roles)) {
             $this->roles = array();
             $roleNames = $this->getRepository()->getRoles();
             foreach ($roleNames as $roleName) {
-                $result[] = $this->createRoleObject($roleName);
+                $this->roles[] = $this->createRoleObject($roleName);
             }
         }
         return $this->roles;
