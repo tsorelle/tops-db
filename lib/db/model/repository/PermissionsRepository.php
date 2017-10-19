@@ -125,7 +125,7 @@ class PermissionsRepository extends TEntityRepository
      * @return bool
      */
     public function removeRole($roleName) {
-        $roleName = $this->formatDescription($roleName);
+        $roleName = $this->formatKey($roleName);
         $sql = 'delete from '.$this->getDetailTableName().' where roleName = ?';
         $this->executeStatement($sql,[$roleName]);
         return true;
