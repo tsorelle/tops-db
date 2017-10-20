@@ -142,7 +142,7 @@ abstract class TEntityRepository implements IEntityRepository
                 case 'changedby':
                     $stmt->bindValue(":$name", $userName, $fieldDefinitions[$name]);
                     break;
-                case 'changed0n':
+                case 'changedon':
                     $stmt->bindValue(":$name", $date, $fieldDefinitions[$name]);
                     break;
                 default:
