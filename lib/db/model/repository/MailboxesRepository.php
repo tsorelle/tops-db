@@ -49,7 +49,7 @@ class MailboxesRepository extends TEntityRepository
     public function getMailboxList($showAll=false) {
 
         $params = array();
-        $fieldList = "mailboxcode,address,displaytext, IFNULL(description,'') AS description";
+        $fieldList = "mailboxcode,address,displaytext, public, IFNULL(description,'') AS description";
         $where = '';
         if (!$showAll) {
             $params = [1,1];
