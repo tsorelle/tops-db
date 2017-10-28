@@ -67,7 +67,9 @@ class TModelBuilder
         $entityProperties = array();
         $fieldDefs = array();
         $isTimestamped = false;
-
+        $namedEntityFields = array(
+            'id','name','description','code'
+        );
         foreach ($fields as $field) {
             $fieldName = $field->Field;
             switch ($field->Field) {
@@ -88,7 +90,7 @@ class TModelBuilder
                     $fieldDefs[] = "'$fieldName'=>PDO::PARAM_STR";
                     break;
                 default:
-                    $entityProperties[] = '    public $' . $field->Field . ";";
+                    $entityProperties[$field->Field] = '    public $' . $field->Field . ";";
                     $type = explode('(', $field->Type)[0];
                     $type = $type == 'int' ? 'INT' : 'STR';
                     $fieldDefs[] = "'$fieldName'=>PDO::PARAM_$type";
@@ -97,7 +99,23 @@ class TModelBuilder
         }
 
         if ($buildEntity) {
-            $superclass = $isTimestamped ? ' extends \Tops\db\TimeStampedEntity' : '';
+            $superclass = '';
+            if ($isTimestamped) {
+                if (array_key_exists('id',$fieldDefs) &&
+                    array_key_exists('name',$fieldDefs) &&
+                    array_key_exists('code',$fieldDefs) &&
+                    array_key_exists('description',$fieldDefs) ) {
+                    $superclass = ' extends \Tops\db\NamedEntity';
+                    unset($entityProperties['id']);
+                    unset($entityProperties['name']);
+                    unset($entityProperties['code']);
+                    unset($entityProperties['description']);
+                }
+                else {
+                    $superclass = ' extends \Tops\db\TimeStampedEntity';
+                }
+            }
+
             $entity =
                 "<?php \n" .
                 "/** \n" .
@@ -108,7 +126,7 @@ class TModelBuilder
                 "namespace " . self::$appNamespace . "\\entity;" . "\n\n" .
                 "class $entityName $superclass \n" .
                 "{ \n" .
-                join("\n", $entityProperties) .
+                join("\n", array_values($entityProperties)) .
                 "\n} \n";
             
             $fullClassName = self::$appNamespace."\\entity\\" . $entityName;
