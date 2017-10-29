@@ -98,24 +98,40 @@ class TModelBuilder
             }
         }
 
-        if ($buildEntity) {
-            $superclass = '';
-            if ($isTimestamped) {
-                if (array_key_exists('id',$fieldDefs) &&
-                    array_key_exists('name',$fieldDefs) &&
-                    array_key_exists('code',$fieldDefs) &&
-                    array_key_exists('description',$fieldDefs) ) {
-                    $superclass = ' extends \Tops\db\NamedEntity';
-                    unset($entityProperties['id']);
-                    unset($entityProperties['name']);
-                    unset($entityProperties['code']);
-                    unset($entityProperties['description']);
-                }
-                else {
-                    $superclass = ' extends \Tops\db\TimeStampedEntity';
+
+        $repositorySuperclass = '\Tops\db\TEntityRepository';
+        $propertyCount = sizeof($entityProperties);
+        $isNamedEntity = false;
+
+        if ($isTimestamped) {
+            if (array_key_exists('id',$entityProperties) &&
+                array_key_exists('name',$entityProperties) &&
+                array_key_exists('code',$entityProperties) &&
+                array_key_exists('description',$entityProperties) ) {
+                $superclass = 'NamedEntity';
+                $isNamedEntity = true;
+                $lookupField = null;
+                unset($entityProperties['id']);
+                unset($entityProperties['name']);
+                unset($entityProperties['code']);
+                unset($entityProperties['description']);
+                unset($entityProperties['active']);
+                $repositorySuperclass = '\Tops\db\TNamedEntitiesRepository';
+                if (sizeof($entityProperties) == 0) {
+                    $propertyCount = 0;
+                    $buildEntity = false;
+                    $fullClassName = '\Tops\db\NamedEntity';
+                    $lookupField = null;
                 }
             }
+            else {
+                $superclass = 'TimeStampedEntity';
+            }
+        }
 
+        if ($buildEntity) {
+            $superclass =  isset($superclass) ?  ' extends \Tops\db\\'.$superclass : '';
+            $dto ='$dto';
             $entity =
                 "<?php \n" .
                 "/** \n" .
@@ -127,12 +143,24 @@ class TModelBuilder
                 "class $entityName $superclass \n" .
                 "{ \n" .
                 join("\n", array_values($entityProperties)) .
-                "\n} \n";
-            
+                "\n\n     public function assignFromObject($dto) {\n";
+
+            if ($isNamedEntity) {
+                $entity.= "    parent::assignFromObject($dto);\n";
+            }
+            foreach (array_keys($entityProperties) as $fieldName) {
+                $entity .=
+                    '    if (isset($dto->'.$fieldName.")) {\n".
+                    '       $this->'.$fieldName.' = $dto->'.$fieldName.";\n".
+                    "    }\n";
+            }
+
+            $entity .= "\n} \n}";
+
             $fullClassName = self::$appNamespace."\\entity\\" . $entityName;
         }
-        else {
-            $fullClassName = $entityName;
+        else if (!isset($fullClassName)){
+            $fullClassName =   $entityName;
         }
 
         $code = array(
@@ -146,14 +174,10 @@ class TModelBuilder
             'use \PDO;',
             'use PDOStatement;',
             'use Tops\db\TDatabase;',
-            'use Tops\db\TEntityRepository;',
+            "use $repositorySuperclass;",
             '',
-            "class $repository" . "Repository extends TEntityRepository ",
+            "class $repository" . "Repository extends $repositorySuperclass",
             "{",
-            "    protected function getClassName() {",
-            "        return '$fullClassName';",
-            "    }",
-            "",
             "    protected function getTableName() {",
             "        return '$tableName';",
             "    }",
@@ -161,11 +185,17 @@ class TModelBuilder
             "    protected function getDatabaseId() {",
             "        return $databaseId;",
             "    }",
-            "",
-            "    protected function getFieldDefinitionList()",
-            "    {",
-            "        return array("
-            );
+            "");
+
+
+        if ($propertyCount > 0) {
+            $code[] = "    protected function getClassName() {";
+            $code[] ="        return '$fullClassName';";
+            $code[] ="    }";
+            $code[] ="";
+            $code[] ="    protected function getFieldDefinitionList()";
+            $code[] ="    {";
+            $code[] ="        return array(";
 
             $last = sizeof($fieldDefs);
             $count = 0;
@@ -173,15 +203,16 @@ class TModelBuilder
                 $count++;
                 $code[] = "        $def".($count == $last? ');' : ',');
             }
-
-
             $code[] = '    }';
 
-        if (!empty($lookupField)) {
-            $code[] =  "    protected function getLookupField() {";
-            $code[] =  "        return '$lookupField';";
-            $code[] =  "    }";
+            if (!empty($lookupField)) {
+                $code[] =  "    protected function getLookupField() {";
+                $code[] =  "        return '$lookupField';";
+                $code[] =  "    }";
+            }
         }
+
+
 
         $code[] = '}';
 
@@ -290,12 +321,12 @@ class TModelBuilder
         foreach ($parts as $part) {
             $className .= strtoupper(substr($part, 0, 1)) . substr($part, 1);
         }
-/*
-        $plural = substr($className, strlen($className) - 1);
-        if ($plural == 's') {
-            $className = substr($className, 0, strlen($className) - 1);
-        }
-*/
+        /*
+                $plural = substr($className, strlen($className) - 1);
+                if ($plural == 's') {
+                    $className = substr($className, 0, strlen($className) - 1);
+                }
+        */
         return $className;
     }
 
