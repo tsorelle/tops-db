@@ -89,7 +89,12 @@ abstract class TEntityRepository implements IEntityRepository
 
     protected function executeEntityQuery($where,$params,$includeInactive = false) {
         $sql = 'SELECT * '.'FROM '.$this->getTableName().' WHERE '.$where;
-        if (!$includeInactive) {
+        if (!$includeInactive
+            && array_key_exists('active',$this->getFieldDefinitionList())
+            && strpos($where,'active=') !== false) {
+            // in cases where there is a clause at the end and you need to filter out inactives
+            // put 'active=1' in the $where paramater
+            // e.g.  executeEntityQuery('name=? and active=1 ORDER BY name limit 1',[$name])
             $sql .= ' AND active=1';
         }
         $stmt = $this->executeStatement($sql,$params);
@@ -225,10 +230,9 @@ abstract class TEntityRepository implements IEntityRepository
     {
         $dbh = $this->getConnection();
         $sql = 'SELECT * FROM '.$this->getTableName();
-        if (!$includeInactive) {
+        if (!$includeInactive && array_key_exists('active',$this->getFieldDefinitionList())) {
             $sql .= ' WHERE active=1';
         }
-
         /**
          * @var PDOStatement
          */
