@@ -47,14 +47,17 @@ class TDbTranslator extends TLanguage
      * @param string $username
      * @return int number imported
      */
-    public function importTranslations($iniFilePath,$username='admin')
+    public function importTranslations($ini=null,$username='admin')
     {
         $count = 0;
-        if ($iniFilePath === 'core') {
+        if ($ini === 'core') {
             $import = $this->getCoreTranslations();
         }
+        else if ($ini === null) {
+            $import = $ini;
+        }
         else {
-            $import = @parse_ini_file($iniFilePath, true);
+            $import = @parse_ini_file($ini, true);
         }
         if (!empty($import)) {
             $repository = $this->getRepository();
