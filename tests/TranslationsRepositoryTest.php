@@ -8,6 +8,7 @@
 
 use Tops\db\model\repository\TranslationsRepository;
 use PHPUnit\Framework\TestCase;
+use Tops\sys\TLanguage;
 use TwoQuakers\testing\RepositoryTestFixture;
 
 class TranslationsRepositoryTest extends RepositoryTestFixture
@@ -17,6 +18,7 @@ class TranslationsRepositoryTest extends RepositoryTestFixture
     }
 
     public function testSupportedLanguages() {
+        $this->runSqlScript('add-translations-test-data');
         $repository = new TranslationsRepository();
         $result = $repository->getSupportedLanguages();
         $expected = 4;
@@ -25,6 +27,7 @@ class TranslationsRepositoryTest extends RepositoryTestFixture
     }
 
     public function testGetTranslation() {
+        $this->runSqlScript('add-translations-test-data');
         $repository = new TranslationsRepository();
         $code = 'hello';
         $languages = ['en-US','en'];
@@ -33,6 +36,11 @@ class TranslationsRepositoryTest extends RepositoryTestFixture
         $this->assertEquals($expected,$actual);
 
         $languages = ['en'];
+        $expected = 'Hello';
+        $actual = $repository->getTranslation($languages,$code);
+        $this->assertEquals($expected,$actual);
+
+        $languages = ['en-UK','en'];
         $expected = 'Hello';
         $actual = $repository->getTranslation($languages,$code);
         $this->assertEquals($expected,$actual);
@@ -54,5 +62,23 @@ class TranslationsRepositoryTest extends RepositoryTestFixture
 
 
     }
+
+    public function testImport() {
+        $repository = new TranslationsRepository();
+        $code = 'hello';
+        $languages = ['en-TX','sp','en'];
+
+        $expected = 'Howdy partner';
+        $repository->import('en-TX',$code,$expected);
+        $actual = $repository->getTranslation($languages,$code);
+        $this->assertEquals($expected,$actual);
+
+        $expected = 'Howdy there';
+        $repository->import('en-TX',$code,$expected);
+        $actual = $repository->getTranslation($languages,$code);
+        $this->assertEquals($expected,$actual);
+    }
+
+
 
 }

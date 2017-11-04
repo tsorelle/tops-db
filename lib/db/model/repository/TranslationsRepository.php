@@ -8,6 +8,7 @@ namespace Tops\db\model\repository;
 
 use \PDO;
 use PDOStatement;
+use Tops\db\model\entity\Translation;
 use Tops\db\TDatabase;
 use \Tops\db\TEntityRepository;
 
@@ -53,6 +54,37 @@ class TranslationsRepository extends \Tops\db\TEntityRepository
         $sql = 'SELECT distinct language from '.$this->getTableName().' where active=1';
         $stmt = $this->executeStatement($sql);
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
 
+    /**
+     * @param $language
+     * @param $code
+     * @param $text
+     * @param string $userName
+     * @return int
+     */
+    public function import($language,$code,$text,$userName='admin') {
+        /**
+         * @var $translation Translation
+         */
+        $translation = $this->getSingleEntity('language=? && code=?',array($language,$code));
+        $isNew = empty($translation);
+        if (empty($translation)) {
+            $translation = new Translation();
+            $translation->code = $code;
+            $translation->language = $language;
+        }
+        else if ($text === $translation->text) {
+            return 0;
+        }
+        $translation->active = true;
+        $translation->text = $text;
+        if ($isNew) {
+            $this->insert($translation,$userName);
+        }
+        else {
+            $this->update($translation,$userName);
+        }
+        return 1;
     }
 }
