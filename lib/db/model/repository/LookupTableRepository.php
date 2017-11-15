@@ -85,7 +85,7 @@ class LookupTableRepository extends TNamedEntitiesRepository
              * @var $result LookupTableEntity[];
              */
             $result = array();
-            $result = $this->getAll();
+            $result = $this->getListing();
             $count = sizeof($result);
             for ($i = 0; $i < $count; $i++) {
                 $item = $result[$i];
@@ -93,9 +93,15 @@ class LookupTableRepository extends TNamedEntitiesRepository
                     $result[$i]->description = '';
                 }
                 if ($translate) {
+                    if ($item->name === $item->description || $item->description=='') {
+                        $item->description = null;
+                    }
                     $translateCode = 'lookup-' . $this->lookupName . '-' . strtolower(str_replace(' ', '-', $item->code));
-                    $result[$i]->name = TLanguage::text($translateCode . '-name', $item->name);
-                    $result[$i]->description = TLanguage::text($translateCode . '-description', $item->name);
+                    $name = TLanguage::text($translateCode . '-name', $item->name);
+                    $result[$i]->name = $name;
+                    $result[$i]->description =  ($item->description == null) ?
+                        $name :
+                        TLanguage::text($translateCode . '-description', $item->description);
                 }
             }
             $this->getCache()->Set($this->cacheKey, $result);
