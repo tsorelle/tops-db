@@ -63,7 +63,7 @@ class TVariables
 
     public function clearCache() {
         if (isset($this->cache)) {
-            $this->cache->Flush();
+            $this->cache->Remove(self::cacheKey);
         }
     }
 
