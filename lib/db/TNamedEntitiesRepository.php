@@ -26,6 +26,11 @@ class TNamedEntitiesRepository extends TEntityRepository
         return null;
     }
 
+    public function getEntityByCode($value, $includeInactive)
+    {
+        return parent::getEntity($value, $includeInactive, 'code');
+    }
+
     public function getListing($where='',$includeInactive=false) {
 
         $dbh = $this->getConnection();
