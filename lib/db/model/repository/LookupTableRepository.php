@@ -33,7 +33,7 @@ class LookupTableRepository extends TNamedEntitiesRepository
         $parts = explode('_',$tableName);
         if ($parts > 1) {
             array_shift($parts);
-            $this->lookupName = join('_',$parts);
+            $this->lookupName = join('',$parts);
         }
         else {
             $this->prefix = 'core';
@@ -79,6 +79,9 @@ class LookupTableRepository extends TNamedEntitiesRepository
 
     public function getLookupList($translate=true)
     {
+        // todo: comment out for production optimization
+        $this->getCache()->Flush();
+
         $result = $this->getCache()->Get($this->cacheKey);
         if (!is_array($result)) {
             /**
