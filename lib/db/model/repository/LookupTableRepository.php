@@ -25,6 +25,9 @@ class LookupTableRepository extends TNamedEntitiesRepository
     private $lookupName;
     private $cacheKey;
 
+    const translateItems = true;
+    const noTranslation = false;
+
     public function __construct($tableName,$database = null)
     {
         $this->tableName = $tableName;
@@ -77,7 +80,7 @@ class LookupTableRepository extends TNamedEntitiesRepository
         return $this->cache;
     }
 
-    public function getLookupList($translate=true)
+    public function getLookupList($translate=true,$where='',$includeInactive=false)
     {
         // todo: comment out for production optimization
         $this->getCache()->Flush();
@@ -88,7 +91,7 @@ class LookupTableRepository extends TNamedEntitiesRepository
              * @var $result LookupTableEntity[];
              */
             $result = array();
-            $result = $this->getListing();
+            $result = $this->getListing($where,$includeInactive);
             $count = sizeof($result);
             for ($i = 0; $i < $count; $i++) {
                 $item = $result[$i];
