@@ -109,7 +109,7 @@ abstract class TEntityRepository implements IEntityRepository
         return $stmt;
     }
 
-    protected function addSqlConditionals($sql, $includeInactive, $where)
+    protected function addSqlConditionals($sql, $includeInactive, $where, $clauses='')
     {
         $activeOnly = (
             (!$includeInactive)
@@ -122,6 +122,9 @@ abstract class TEntityRepository implements IEntityRepository
 
         if (!empty($where)) {
             $sql .= $activeOnly ? ' AND (' . $where . ')' : ' WHERE ' . $where;
+        }
+        if (!empty($clauses)) {
+            $sql = "$sql $clauses";
         }
         return $sql;
     }

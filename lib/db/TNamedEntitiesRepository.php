@@ -31,7 +31,7 @@ class TNamedEntitiesRepository extends TEntityRepository
         return parent::getEntity($value, $includeInactive, 'code');
     }
 
-    public function getListing($where='',$includeInactive=false) {
+    public function getListing($where='',$includeInactive=false,$clauses='') {
 
         $dbh = $this->getConnection();
         $sql =
@@ -39,7 +39,7 @@ class TNamedEntitiesRepository extends TEntityRepository
                 "SELECT id,`code`,`name`, IF(description IS NULL OR description='',`name`,description) AS description FROM ".
                     $this->getTableName(),
                     $includeInactive,
-                    $where);
+                    $where,$clauses);
 
         /**
          * @var PDOStatement

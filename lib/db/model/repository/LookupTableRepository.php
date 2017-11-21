@@ -27,6 +27,9 @@ class LookupTableRepository extends TNamedEntitiesRepository
 
     const translateItems = true;
     const noTranslation = false;
+    const sortByName = 'name';
+    const sortByCode = 'code';
+    const noSort = '';
 
     public function __construct($tableName,$database = null)
     {
@@ -80,7 +83,7 @@ class LookupTableRepository extends TNamedEntitiesRepository
         return $this->cache;
     }
 
-    public function getLookupList($translate=true,$where='',$includeInactive=false)
+    public function getLookupList($translate=true,$sort=self::sortByName,$where='',$includeInactive=false)
     {
         // todo: comment out for production optimization
         $this->getCache()->Flush();
@@ -91,7 +94,8 @@ class LookupTableRepository extends TNamedEntitiesRepository
              * @var $result LookupTableEntity[];
              */
             $result = array();
-            $result = $this->getListing($where,$includeInactive);
+            $clauses = empty($sort) ? '' : 'ORDER BY '.$sort;
+            $result = $this->getListing($where,$includeInactive,$clauses);
             $count = sizeof($result);
             for ($i = 0; $i < $count; $i++) {
                 $item = $result[$i];
