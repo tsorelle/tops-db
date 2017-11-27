@@ -15,12 +15,8 @@ use PDOStatement;
 class TAssociationRepository
 {
     private $associationTable;
-    private $leftTable;
-    private $rightTable;
-    private $leftIdField;
-    private $rightIdField;
-    private $leftClass;
-    private $rightClass;
+    private $left;
+    private $right;
     private $databaseId = null;
     private $connection = null;
 
@@ -35,16 +31,20 @@ class TAssociationRepository
         $databaseId = null)
     {
         $this->associationTable = $associationTable;
-        $this->leftTable = $leftTable;
-        $this->rightTable = $rightTable;
-        $this->leftIdField = $leftIdField;
-        $this->rightIdField = $rightIdField;
-        $this->leftClass = $leftClass;
-        $this->rightClass = $rightClass;
+        $this->left = $this->createTableInfo($leftTable,$leftIdField,$leftClass);
+        $this->right = $this->createTableInfo($rightTable,$rightIdField,$rightClass);
         $this->databaseId = $databaseId;
     }
 
-    protected function getConnection()
+    private function createTableInfo($name,$idField,$className) {
+        $result = new \stdClass();
+        $result->tableName = $name;
+        $result->idField = $idField;
+        $result->className = $className;
+        return $result;
+    }
+
+    private function getConnection()
     {
         if ($this->connection != null) {
             return $this->connection;
@@ -52,23 +52,8 @@ class TAssociationRepository
         return TDatabase::getConnection($this->databaseId);
     }
 
-    /**
-     * @param $sql
-     * @param array $params
-     * @return PDOStatement
-     */
-    protected function executeStatement($sql, $params = array())
-    {
-        $dbh = $this->getConnection();
-        /**
-         * @var PDOStatement
-         */
-        $stmt = $dbh->prepare($sql);
-        $stmt->execute($params);
-        return $stmt;
-    }
+    private function getAssociated($ownerId, $itemsTable, $filterTable, $fields='*', $fetchMode=PDO::FETCH_CLASS) {
 
-    public function getAssociated($ownerId, $tableName, $idField, $associationIdField, $fields='*', $fetchMode, $className) {
         if (is_array($fields)) {
             array_map(function($field) {
                 return 't.'.$field;
@@ -78,21 +63,35 @@ class TAssociationRepository
         else {
             $fields = 't.'.$fields;
         }
-        $sql =
-            "SELECT $fields FROM $this->associationTable a ".
-            "JOIN $tableName t ON a.$idField = t.id ".
-            "WHERE a.$associationIdField = ?";
 
-        $stmt = $this->executeStatement($sql, [$ownerId]);
-        if ($className == 'stdclass') {
-            $stmt->setFetchMode(PDO::FETCH_OBJ);
+        $sql =
+            "SELECT $fields ".
+            "FROM $this->associationTable a  ".
+            "JOIN $itemsTable->tableName t ON a.$itemsTable->idField = t.id ".
+            "JOIN $filterTable->tableName f ON f.id = a.$filterTable->idField ".
+            "WHERE a.$filterTable->idField = ?";
+
+        $dbh = $this->getConnection();
+        /**
+         * @var PDOStatement
+         */
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute([$ownerId]);
+
+        if ($fetchMode === PDO::FETCH_CLASS) {
+            if ($itemsTable->className === 'stdclass') {
+                $result = $stmt->fetchAll(PDO::FETCH_OBJ);
+            }
+            else {
+                /** @noinspection PhpMethodParametersCountMismatchInspection */
+                $stmt->setFetchMode(PDO::FETCH_CLASS, $itemsTable->className);
+                $result = $stmt->fetchAll();
+            }
         }
         else {
-            /** @noinspection PhpMethodParametersCountMismatchInspection */
-            $stmt->setFetchMode(PDO::FETCH_CLASS, $className);
-        }
+            $result = $stmt->fetchAll($fetchMode);
+        };
 
-        $result = $stmt->fetchAll();
         if (empty($result)) {
             return false;
         }
@@ -101,24 +100,18 @@ class TAssociationRepository
 
 
     public function getRightObjects($ownerId, $fields='*') {
-        $fetchMode = $this->rightClass === 'stdclass' ? PDO::FETCH_OBJ : PDO::FETCH_CLASS;
-        return $this->getAssociated($ownerId,$this->rightTable,$this->leftIdField,$fields,
-            $fetchMode,$this->rightClass);
+        return $this->getAssociated( $ownerId,$this->right,$this->left, $fields);
     }
 
     public function getLeftObjects($ownerId, $fields='*') {
-        $fetchMode = $this->leftClass === 'stdclass' ? PDO::FETCH_OBJ : PDO::FETCH_CLASS;
-        return $this->getAssociated($ownerId,$this->leftTable,$this->rightIdField,$fields,
-            $fetchMode,$this->leftClass);
+        return $this->getAssociated( $ownerId,$this->left,$this->right, $fields);
     }
 
-    public function getRightIdValues($ownerId) {
-        return $this->getAssociated($ownerId,$this->rightTable,$this->leftIdField,'id',
-            PDO::FETCH_COLUMN,$this->leftClass);
+    public function getRightValues($ownerId,$field='id') {
+        return $this->getAssociated( $ownerId,$this->right,$this->left, $field,PDO::FETCH_COLUMN);
     }
 
-    public function getLeftIdValues($ownerId) {
-        return $this->getAssociated($ownerId,$this->leftTable,$this->rightIdField,'id',
-            PDO::FETCH_COLUMN,$this->leftClass);
+    public function getLeftValues($ownerId,$field='id') {
+        return $this->getAssociated( $ownerId,$this->left,$this->right, $field,PDO::FETCH_COLUMN);
     }
 }
