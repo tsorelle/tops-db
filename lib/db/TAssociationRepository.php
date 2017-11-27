@@ -52,6 +52,22 @@ class TAssociationRepository
         return TDatabase::getConnection($this->databaseId);
     }
 
+    /**
+     * @param $sql
+     * @param array $params
+     * @return PDOStatement
+     */
+    protected function executeStatement($sql, $params = array())
+    {
+        $dbh = $this->getConnection();
+        /**
+         * @var PDOStatement
+         */
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute($params);
+        return $stmt;
+    }
+
     private function getAssociated($ownerId, $itemsTable, $filterTable, $fields='*', $fetchMode=PDO::FETCH_CLASS) {
 
         if (is_array($fields)) {
@@ -71,12 +87,7 @@ class TAssociationRepository
             "JOIN $filterTable->tableName f ON f.id = a.$filterTable->idField ".
             "WHERE a.$filterTable->idField = ?";
 
-        $dbh = $this->getConnection();
-        /**
-         * @var PDOStatement
-         */
-        $stmt = $dbh->prepare($sql);
-        $stmt->execute([$ownerId]);
+        $stmt = $this->executeStatement($sql,[$ownerId]);
 
         if ($fetchMode === PDO::FETCH_CLASS) {
             if ($itemsTable->className === 'stdclass') {
@@ -99,6 +110,53 @@ class TAssociationRepository
     }
 
 
+    private function updateAssociations($ownerId, $newValues=[],$itemsTable, $filterTable) {
+        $sql = "SELECT $itemsTable->idField as id FROM $this->associationTable WHERE $filterTable->idField = ?";
+        $stmt = $this->executeStatement($sql,[$ownerId]);
+        $current = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $toDelete = array_filter($current, function($currentId) use($newValues) {
+           return (!in_array($currentId,$newValues));
+        });
+
+        $toAdd = array_filter($newValues, function($currentId) use($current) {
+            return (!in_array($currentId,$current));
+        });
+
+        foreach ($toDelete as $itemId) {
+            $sql = "DELETE FROM $this->associationTable WHERE $filterTable->idField=? and $itemsTable->idField=?";
+            $stmt = $this->executeStatement($sql, [$ownerId,$itemId]);
+        }
+
+        foreach ($toAdd as $itemId) {
+            $sql = "INSERT INTO  $this->associationTable ($filterTable->idField, $itemsTable->idField) values  (?, ?)";
+            $stmt = $this->executeStatement($sql, [$ownerId,$itemId]);
+        }
+
+    }
+
+    public function addAssociation($ownerId, $itemId, $itemsTable, $filterTable) {
+        $sql = "SELECT $itemsTable->idField as id FROM $this->associationTable WHERE $filterTable->idField = ?";
+        $stmt = $this->executeStatement($sql,[$ownerId]);
+        $current = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array($itemId, $current)) {
+            $sql = "INSERT INTO  $this->associationTable ($filterTable->idField, $itemsTable->idField) values  (?, ?)";
+            $stmt = $this->executeStatement($sql, [$ownerId,$itemId]);
+        }
+    }
+
+    public function removeAssociation($ownerId, $itemId, $itemsTable,$filterTable)
+    {
+        $sql = "DELETE FROM $this->associationTable WHERE $filterTable->idField=? and $itemsTable->idField=?";
+        $stmt = $this->executeStatement($sql, [$itemId, $ownerId]);
+    }
+
+
+    public function removeAll($ownerId, $filterTable)
+    {
+        $sql = "DELETE FROM $this->associationTable WHERE $filterTable->idField=?";
+        $stmt = $this->executeStatement($sql, [$ownerId]);
+    }
+
     public function getRightObjects($ownerId, $fields='*') {
         return $this->getAssociated( $ownerId,$this->right,$this->left, $fields);
     }
@@ -114,4 +172,38 @@ class TAssociationRepository
     public function getLeftValues($ownerId,$field='id') {
         return $this->getAssociated( $ownerId,$this->left,$this->right, $field,PDO::FETCH_COLUMN);
     }
+
+    public function updateLeftValues($ownerId,$newValues=[]) {
+        $this->updateAssociations($ownerId,$newValues,$this->left,$this->right);
+    }
+
+    public function updateRightValues($ownerId,$newValues=[]) {
+        $this->updateAssociations($ownerId,$newValues,$this->right,$this->left);
+    }
+
+    public function addAssociationRight($ownerId,$itemId) {
+        $this->addAssociation($ownerId,$itemId,$this->right,$this->left);
+    }
+
+    public function addAssociationLeft($ownerId,$itemId) {
+        $this->addAssociation($ownerId,$itemId, $this->left,$this->right);
+    }
+
+    public function removeAssociationRight($ownerId,$itemId) {
+        $this->removeAssociation($ownerId,$itemId, $this->left,$this->right);
+    }
+
+    public function removeAssociationLeft($ownerId,$itemId) {
+        $this->removeAssociation($ownerId,$itemId,$this->right,$this->left);
+    }
+
+    public function removeAllRight($ownerId) {
+        $this->removeAll($ownerId, $this->right);
+    }
+
+    public function removeAllLeft($ownerId) {
+        $this->removeAll($ownerId,$this->left);
+    }
+
+
 }
