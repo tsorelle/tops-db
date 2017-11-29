@@ -104,7 +104,7 @@ class TAssociationRepository
         };
 
         if (empty($result)) {
-            return false;
+            return [];
         }
         return $result;
     }
