@@ -196,8 +196,9 @@ abstract class TEntityRepository implements IEntityRepository
     public function update($dto, $userName = 'admin')
     {
         $updateValues = array();
+        $fieldNames =  array_keys($this->getFieldDefinitions());
         foreach ($dto as $name => $value) {
-            if ($name != 'id' && $name != 'createdby' && $name != 'createdon') {
+            if ($name != 'id' && $name != 'createdby' && $name != 'createdon' && in_array($name,$fieldNames)) {
                 $updateValues[$name] = $value;
             }
         }
