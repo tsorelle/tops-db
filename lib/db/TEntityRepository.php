@@ -114,8 +114,9 @@ abstract class TEntityRepository implements IEntityRepository
         $activeOnly = (
             (!$includeInactive)
             && array_key_exists('active', $this->getFieldDefinitionList())
-            && strpos($where, 'active=') !== false
+            && strpos($where, 'active=') === false
         );
+
         if ($activeOnly) {
             $sql .= ' WHERE active=1 ';
         }
@@ -123,6 +124,7 @@ abstract class TEntityRepository implements IEntityRepository
         if (!empty($where)) {
             $sql .= $activeOnly ? ' AND (' . $where . ')' : ' WHERE ' . $where;
         }
+
         if (!empty($clauses)) {
             $sql = "$sql $clauses";
         }
