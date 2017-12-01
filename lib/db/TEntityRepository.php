@@ -249,7 +249,10 @@ abstract class TEntityRepository implements IEntityRepository
                     $stmt->bindValue(":$name", $date, $fieldDefinitions[$name]);
                     break;
                 default:
-                    $stmt->bindValue(":$name", $value, $fieldDefinitions[$name]);
+                    // ignore dto properties not in field list
+                    if (in_array($name, $fieldNames)) {
+                        $stmt->bindValue(":$name", $value, $fieldDefinitions[$name]);
+                    }
                     break;
             }
         }
