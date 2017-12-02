@@ -42,6 +42,11 @@ abstract class TEntityRepository implements IEntityRepository
      */
     private $connection = null;
 
+    private $lastErrorCode = PDO::ERR_NONE;
+    public function getLastErrorCode() {
+        return $this->lastErrorCode;
+    }
+
     protected function getConnection()
     {
         if ($this->connection != null) {
@@ -188,7 +193,8 @@ abstract class TEntityRepository implements IEntityRepository
         }
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $count = $stmt->execute();
-        $result = $dbh->errorCode();
+        $this->lastErrorCode = $dbh->errorCode();
+        $result = $stmt->rowCount();
         return $result;
     }
 
@@ -226,6 +232,7 @@ abstract class TEntityRepository implements IEntityRepository
 
         $today = new \DateTime();
         $date = $today->format('Y-m-d H:i:s');
+        $bound = [];
 
         /**
          * @var PDOStatement
@@ -245,12 +252,13 @@ abstract class TEntityRepository implements IEntityRepository
                 case 'changedby':
                     $stmt->bindValue(":$name", $userName, $fieldDefinitions[$name]);
                     break;
-                case 'changed0n':
+                case 'changedon':
                     $stmt->bindValue(":$name", $date, $fieldDefinitions[$name]);
                     break;
                 default:
                     // ignore dto properties not in field list
                     if (in_array($name, $fieldNames)) {
+                        $bound[] = $name;
                         $stmt->bindValue(":$name", $value, $fieldDefinitions[$name]);
                     }
                     break;
@@ -259,8 +267,11 @@ abstract class TEntityRepository implements IEntityRepository
 
         // $count =
         $stmt->execute();
-        $result = $dbh->lastInsertId();
-        return $result;
+        $this->lastErrorCode = $stmt->errorCode();
+        if ($this->lastErrorCode == PDO::ERR_NONE) {
+            return $dbh->lastInsertId();
+        }
+        return false;
     }
 
     public function getAll($includeInactive = false)
@@ -290,7 +301,11 @@ abstract class TEntityRepository implements IEntityRepository
         $stmt = $dbh->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute(array($id));
-        return $stmt->errorCode();
+        $this->lastErrorCode = $stmt->errorCode();
+        if ($this->lastErrorCode == PDO::ERR_NONE) {
+            return $stmt->rowCount();
+        }
+        return false;
     }
 
     public function remove($id)

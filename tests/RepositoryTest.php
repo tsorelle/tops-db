@@ -122,9 +122,8 @@ class RepositoryTest extends RepositoryTestFixture
         $customer->state = $expectedState;
         $customer->postalcode = $expectedPostalcode;
 
-        $errorCode = $repository->update($customer);
-        $expected = 0;
-        $this->assertEquals($expected,$errorCode);
+        $result = $repository->update($customer);
+        $this->assertEquals(1,$result);
 
         $customer = $repository->get(1);
 
@@ -156,8 +155,8 @@ class RepositoryTest extends RepositoryTestFixture
             'state' => $expectedState,
             'postalcode' => $expectedPostalcode);
 
-        $errorcode = $repository->updateValues($expectedId,$updateValues);
-        $this->assertEquals(0,$errorcode);
+        $rowcount = $repository->updateValues($expectedId,$updateValues);
+        $this->assertEquals(1,$rowcount);
 
         $customer = $repository->get($expectedId);
 
@@ -175,8 +174,8 @@ class RepositoryTest extends RepositoryTestFixture
     public function testRemove() {
         $this->runSqlScript('new-customer-table');
         $repository = new \Bookstore\model\repository\CustomerRepository();
-        $errorcode = $repository->remove(1);
-        $this->assertEquals(0,$errorcode);
+        $rowcount = $repository->remove(1);
+        $this->assertEquals(1,$rowcount);
         $remaining = $repository->getAll();
         $expected = 1;
         $actual = sizeof($remaining);
@@ -186,8 +185,8 @@ class RepositoryTest extends RepositoryTestFixture
     public function testDelete() {
         $this->runSqlScript('new-customer-table');
         $repository = new \Bookstore\model\repository\CustomerRepository();
-        $errorcode = $repository->delete(1); // delete rather than deactivate
-        $this->assertEquals(0,$errorcode);
+        $rowcount = $repository->delete(1); // delete rather than deactivate
+        $this->assertEquals(1,$rowcount);
         $remaining = $repository->getAll();
         $expected = 1;
         $actual = sizeof($remaining);
